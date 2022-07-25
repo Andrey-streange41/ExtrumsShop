@@ -1,0 +1,208 @@
+@import url("https://fonts.googleapis.com/css2?family=Play&display=swap");
+.container {
+    background: #ebecee;
+    min-height: 100vh;
+
+    &__field {
+        margin-left: 100px;
+
+        &__content {
+            flex-direction: column;
+            display: flex;
+            gap: 3em;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 3em;
+
+            &__row1 {
+                min-width: 45%;
+                width: 75%;
+
+                background: #ffffff;
+                border-radius: 10px;
+                margin-top: 3em;
+                display: flex;
+
+                &__galery {
+                    height: 100%;
+                    width: 45%;
+                    &__swiper {
+                        width: 100%;
+                        padding: 20px;
+                    }
+                }
+                &__cardInfo {
+                    padding: 3em;
+                    display: flex;
+                    flex-wrap: wrap;
+                    flex-direction: column;
+                    gap: 2em;
+                    width: 100%;
+                    &__UI {
+                        width: 100%;
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        justify-content: flex-start;
+                        gap: 1.5em;
+                        &__item {
+                            width: 20%;
+                            display: flex;
+                            flex-wrap: wrap;
+                            align-items: center;
+                            gap: 1em;
+
+                            img{
+                                max-width: 25px;
+                                max-height: 25px;
+                            }
+                        }
+                    }
+                    &__title {
+                        width: 100%;
+                        font-style: normal;
+                        font-weight: 800;
+                        font-size: 1.2em;
+                        line-height: 39px;
+                        color: #171313;
+                        align-items: center;
+                    }
+                    &__addInfo {
+                        display: flex;
+                        flex-direction: column;
+                        flex-wrap: wrap;
+                        gap: 1em;
+                        &__descr {
+                            width: 50%;
+                            display: flex;
+                            align-items: center;
+                            gap:0.5em;
+                            flex-wrap: wrap;
+
+                            &__design {
+                                font-family: Inter;
+                                font-style: normal;
+                                font-weight: 600;
+                                font-size: 0.9em;
+                                color: #000000;
+                            }
+                            &__text {
+                                font-style: normal;
+                                font-weight: 500;
+                                font-size: 0.8em;
+                                line-height: 24px;
+                                color: #171313;
+                            }
+                        }
+                    }
+                    &__price {
+                        display: flex;
+                        align-items: center;
+                        width: 50%;
+
+                        img {
+                            width: 35px;
+                            height: 35px;
+                        }
+
+                        span {
+                            font-family: "Inter";
+                            font-style: normal;
+                            font-weight: 400;
+                            font-size: 1.8em;
+                            line-height: 48px;
+                        }
+                    }
+                }
+            }
+
+            &__row2 {
+                min-height: 450px;
+                min-width: 45%;
+                width: 75%;
+                background: #ffffff;
+                border-radius: 10px;
+                margin-top: 3em;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 4em;
+
+                &__menu {
+                    margin-top: 2em;
+                    max-width: 1111px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6.4em;
+
+                    li {
+                        cursor: pointer;
+                        min-width: 183px;
+                        height: 66px;
+                        list-style: none;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        font-family: "Inter";
+                        font-style: normal;
+                        font-weight: 400;
+                        font-size: 1.3em;
+                        line-height: 29px;
+                        padding: 20px;
+                    }
+                }
+
+                &__textInfo {
+                    text-align: left;
+                    max-width: 1111px;
+                    min-height: 288px;
+                    font-family: "Inter";
+                    font-style: normal;
+                    font-weight: 400;
+                    font-size: 1.3em;
+                    line-height: 150.2%;
+                    letter-spacing: 0.035em;
+                    color: #000000;
+                }
+
+                &__characteristics{
+                    width: 90%;
+                    max-width: 1111px;
+                    margin-bottom: 3em;
+                    height:100%;
+                    flex-wrap: wrap;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    
+
+                    &__leftMenu, &__rightMenu{
+                        display: flex;
+                        flex-direction: column;
+                        flex-wrap: wrap;
+                        
+                        width: 50%;
+                        height: 100%;
+                        gap:6em;
+                       
+
+                        &__row{
+                            width: 100%;
+                            display: flex;
+                            span{
+                                width: 40%;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.active {
+    background: #766ed3;
+    border-radius: 10px;
+    color: #ffffff;
+}

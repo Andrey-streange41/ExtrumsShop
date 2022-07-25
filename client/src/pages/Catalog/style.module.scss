@@ -1,0 +1,17 @@
+.container {
+    background: #ebecee;
+    min-height: 100vh;
+
+    &__field {
+        margin-left: 100px;
+
+        &__content {
+            flex-direction: column;
+            display: flex;
+            gap: 3em;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 3em;
+        }
+    }
+}

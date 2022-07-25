@@ -1,0 +1,214 @@
+@import url("https://fonts.googleapis.com/css2?family=Play&display=swap");
+.container {
+  background: #ebecee;
+  min-height: 100vh;
+}
+
+.container__field {
+  margin-left: 100px;
+}
+
+.container__field__content {
+  flex-direction: column;
+  display: flex;
+  gap: 3em;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 3em;
+}
+
+.container__field__content__row1 {
+  min-width: 45%;
+  width: 75%;
+  background: #ffffff;
+  border-radius: 10px;
+  margin-top: 3em;
+  display: flex;
+}
+
+.container__field__content__row1__galery {
+  height: 100%;
+  width: 45%;
+}
+
+.container__field__content__row1__galery__swiper {
+  width: 100%;
+  padding: 20px;
+}
+
+.container__field__content__row1__cardInfo {
+  padding: 3em;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2em;
+  width: 100%;
+}
+
+.container__field__content__row1__cardInfo__UI {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.5em;
+}
+
+.container__field__content__row1__cardInfo__UI__item {
+  width: 20%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1em;
+}
+
+.container__field__content__row1__cardInfo__UI__item img {
+  max-width: 25px;
+  max-height: 25px;
+}
+
+.container__field__content__row1__cardInfo__title {
+  width: 100%;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 1.2em;
+  line-height: 39px;
+  color: #171313;
+  align-items: center;
+}
+
+.container__field__content__row1__cardInfo__addInfo {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+
+.container__field__content__row1__cardInfo__addInfo__descr {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  flex-wrap: wrap;
+}
+
+.container__field__content__row1__cardInfo__addInfo__descr__design {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.9em;
+  color: #000000;
+}
+
+.container__field__content__row1__cardInfo__addInfo__descr__text {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.8em;
+  line-height: 24px;
+  color: #171313;
+}
+
+.container__field__content__row1__cardInfo__price {
+  display: flex;
+  align-items: center;
+  width: 50%;
+}
+
+.container__field__content__row1__cardInfo__price img {
+  width: 35px;
+  height: 35px;
+}
+
+.container__field__content__row1__cardInfo__price span {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.8em;
+  line-height: 48px;
+}
+
+.container__field__content__row2 {
+  min-height: 450px;
+  min-width: 45%;
+  width: 75%;
+  background: #ffffff;
+  border-radius: 10px;
+  margin-top: 3em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4em;
+}
+
+.container__field__content__row2__menu {
+  margin-top: 2em;
+  max-width: 1111px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6.4em;
+}
+
+.container__field__content__row2__menu li {
+  cursor: pointer;
+  min-width: 183px;
+  height: 66px;
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.3em;
+  line-height: 29px;
+  padding: 20px;
+}
+
+.container__field__content__row2__textInfo {
+  text-align: left;
+  max-width: 1111px;
+  min-height: 288px;
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.3em;
+  line-height: 150.2%;
+  letter-spacing: 0.035em;
+  color: #000000;
+}
+
+.container__field__content__row2__characteristics {
+  width: 90%;
+  max-width: 1111px;
+  margin-bottom: 3em;
+  height: 100%;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.container__field__content__row2__characteristics__leftMenu, .container__field__content__row2__characteristics__rightMenu {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 50%;
+  height: 100%;
+  gap: 6em;
+}
+
+.container__field__content__row2__characteristics__leftMenu__row, .container__field__content__row2__characteristics__rightMenu__row {
+  width: 100%;
+  display: flex;
+}
+
+.container__field__content__row2__characteristics__leftMenu__row span, .container__field__content__row2__characteristics__rightMenu__row span {
+  width: 40%;
+}
+
+.active {
+  background: #766ed3;
+  border-radius: 10px;
+  color: #ffffff;
+}
