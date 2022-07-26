@@ -5,14 +5,15 @@ import { NavBar } from "../../components/NavBar";
 import { LocationMenu } from "../../components/LocationMenu/index.tsx";
 import ms from "./style.module.scss";
 import { ToolsPanel } from "../../components/ToolsPanel/index.tsx";
-import { ProductListHorizontal } from "../../components/ProductsListHorizontal/index.tsx";
 import { useSelector } from "react-redux";
 import { FilteredList } from "../../components/FilteredList/index.tsx";
 import { FilterMenu } from "../../components/FilterMenu/index.tsx";
 
+
 export const Catalog = () => {
   const filteredList = useSelector(s=>s.productsList.filteredList);
-
+  
+  
 
   return (
     <>

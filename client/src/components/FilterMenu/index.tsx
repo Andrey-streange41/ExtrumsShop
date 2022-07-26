@@ -13,6 +13,7 @@ import {
   switchAddMenu1,
   switchAddMenu2,
 } from "../../app/slices/modalFilterSlice.ts";
+import { setFilteredList } from "../../app/slices/productsListSlice.ts";
 
 export const FilterMenu = () => {
   const subMenu = useSelector((s) => s.navBar.subMenu);
@@ -26,6 +27,7 @@ export const FilterMenu = () => {
   const isOpenPriceMenu = useSelector((s) => s.modalFilter.isOpenPriceMenu);
   const isOpenAddMenu_1 = useSelector((s) => s.modalFilter.isOpenAddMenu_1);
   const isOpenAddMenu_2 = useSelector((s) => s.modalFilter.isOpenAddMenu_2);
+  const productsList = useSelector(s=>s.productsList.productsList);
 
   return (
     <section
@@ -66,7 +68,14 @@ export const FilterMenu = () => {
               <li>
                 <div
                   className={item.isActive ? ms.radioActive : null}
-                  onClick={() => dispatch(selectModalItem(index))}
+                  onClick={() => {
+                    dispatch(
+                      setFilteredList(
+                        productsList.filter((el) => String(el.subCategory).toLowerCase() === String(item.category).toLowerCase())
+                      )
+                    );
+                    dispatch(selectModalItem(index));
+                  }}
                 ></div>
               </li>
               <label htmlFor={item.category}>{item.category}</label>

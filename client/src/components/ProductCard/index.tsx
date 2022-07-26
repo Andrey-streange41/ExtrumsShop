@@ -27,11 +27,8 @@ export const ProductCard = ({ item }: IProduct) => {
   );
   const link = currentPage + "/" + item.category + "/" + item.id;
 
-  
-
   const addToFavoriteList = () => {
-   
-    if (list.findIndex((el) => el.id === item.id) >= 0) {
+    if (list?.findIndex((el) => el.id === item.id) >= 0) {
       dispatch(removeFromFavoriteList({ ...item, isFavor: false }));
       return;
     }
@@ -39,9 +36,16 @@ export const ProductCard = ({ item }: IProduct) => {
       const element = list[i];
       if (element.title === item.title) return;
     }
-
     localStorage.setItem("favorList", JSON.stringify([...list, item]));
-    dispatch(addToFavorite({ ...item, isFavor: true }));
+    const formatItem = {
+      ...item.userComunication.find((el) => el.name === "favorite"),
+      isActive: true,
+      amount:
+        item.userComunication.find((el) => el.name === "favorite").amount + 1,
+    };
+    const tmp = [...item.userComunication];
+    tmp.splice(2, 1, formatItem);
+    dispatch(addToFavorite({...item,userComunication:[...tmp]}));
   };
 
   const removeFromFavorite = () => {
@@ -63,7 +67,7 @@ export const ProductCard = ({ item }: IProduct) => {
           <img
             onClick={item.isFavor ? removeFromFavorite : addToFavoriteList}
             src={
-              list.findIndex((el) => el.id === item.id) >= 0 ? favorite2 : star
+              list?.findIndex((el) => el.id === item.id) >= 0 ? favorite2 : star
             }
             alt=""
           />
@@ -115,13 +119,13 @@ export const ProductCard = ({ item }: IProduct) => {
                         }
                       : el.name === "dislike"
                       ? () => dispatch(dislikeCliked(item.id))
-                      : el.name === "favorite" &&  list.findIndex((el) => el.id === item.id) >= 0
-                      ? 
-                        removeFromFavorite                        
-                    : el.name === "favorite" &&  list.findIndex((el) => el.id === item.id) < 0
-                      ?addToFavoriteList
-                      :()=>{}
-
+                      : el.name === "favorite" &&
+                        list?.findIndex((el) => el.id === item.id) >= 0
+                      ? removeFromFavorite
+                      : el.name === "favorite" &&
+                        list?.findIndex((el) => el.id === item.id) < 0
+                      ? addToFavoriteList
+                      : () => {}
                   }
                   src={
                     el.name === "like" && el.isActive
@@ -132,9 +136,11 @@ export const ProductCard = ({ item }: IProduct) => {
                       ? el.img
                       : el.name === "dislike" && !el.isActive
                       ? el.img2
-                      : el.name === "favorite" &&  list.findIndex((el) => el.id === item.id) < 0
+                      : el.name === "favorite" &&
+                        list?.findIndex((el) => el.id === item.id) < 0
                       ? el.img2
-                      : el.name === "favorite" && list.findIndex((el) => el.id === item.id) >= 0
+                      : el.name === "favorite" &&
+                        list?.findIndex((el) => el.id === item.id) >= 0
                       ? el.img
                       : el.img
                   }

@@ -4,6 +4,7 @@ import rightArrow from "../../../../assets/images/rightArrow.png";
 import { useDispatch, useSelector } from "react-redux";
 import { selectModalItem } from "../../../../app/slices/navBarSlice.ts";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setFilteredList } from "../../../../app/slices/productsListSlice.ts";
 
 export const Modal = ({ test, active, item }) => {
   const dispatch = useDispatch();
@@ -15,12 +16,13 @@ export const Modal = ({ test, active, item }) => {
       ? loc.pathname.indexOf("/", 1)
       : loc.pathname.length
   );
-  
+
   const nav = useNavigate();
-
-    useEffect(()=>{
-
-    },[])
+  const productsList = useSelector((s) => s.productsList.productsList);
+  useEffect(() => {
+   
+   
+  }, [loc]);
 
   return (
     <section
@@ -37,7 +39,12 @@ export const Modal = ({ test, active, item }) => {
               onClick={(e) => {
                 dispatch(selectModalItem(index));
                 e.stopPropagation();
-
+                
+                dispatch(
+                  setFilteredList(
+                    productsList.filter((el) => String(el.subCategory).toLowerCase() === String(item.category).toLowerCase())
+                  )
+                );
                 if (item.isActive && item.category === e.target.innerHTML) {
                   nav(
                     "/" +
@@ -45,7 +52,6 @@ export const Modal = ({ test, active, item }) => {
                       "/" +
                       subMenu[subMenu.findIndex((el) => el.isActive)]?.text
                   );
-                  
                 } else {
                   nav(
                     "/" +

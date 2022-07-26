@@ -27,18 +27,30 @@ export const Home = () => {
             />
             
             <section className={ms.container__wrapper__content__row}>
+              <Link to={'/catalog/electronics/subcategory/Smartphones'}>
               <img
                 className={ms.container__wrapper__content__row__col1}
                 src={cellphones}
-                alt=""
+                alt="smartphones"
               />
-
-              <img src={laptops} alt="" />
+            </Link>
+            <Link to={'/catalog/electronics/subcategory/Laptops'}>
+                <img src={laptops} alt="laptops" />
+            </Link>
+              
             </section>
             <section className={ms.container__wrapper__content__row}>
-              <img src={library} alt="library.png" />
-              <img src={sport} alt="sport.png" />
-              <img src={travel} alt="travel" />
+              
+              <Link to={'/catalog/books'}>
+                <img src={library} alt="library.png" />
+              </Link>
+              <Link to={'/catalog/sports'}>
+                <img src={sport} alt="sport.png" />
+              </Link>
+              <Link to={'/catalog/travel'}>
+               <img src={travel} alt="travel" />
+              </Link>
+             
             </section>
           </section>
         </section>

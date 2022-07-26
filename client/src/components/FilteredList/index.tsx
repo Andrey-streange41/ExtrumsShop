@@ -6,7 +6,7 @@ import ms from  './style.module.scss';
 
 export const FilteredList = () => {
     const filteredList = useSelector((s)=>s.productsList.filteredList);
-    const mode = useSelector(s=>s.toolsPanel.isActiveViewMode)
+    const mode = useSelector(s=>s.toolsPanel.isActiveViewMode);
 
   return (
     <>

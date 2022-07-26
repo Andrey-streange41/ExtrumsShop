@@ -9,12 +9,11 @@ import { setFilteredList } from "../../app/slices/productsListSlice.ts";
 import { selectSubItem } from "../../app/slices/navBarSlice.ts";
 
 export const NavBar = () => {
-  const loc = useLocation();
   const dispatch = useDispatch();
   const items = useSelector((s) => s.navBar.items);
 
   useEffect(() => {
-    if (localStorage.getItem("currentLocation"))
+    if (localStorage.getItem("currentLocation")&&items.findIndex(el=>el.isActive)===-1)
       dispatch(setActive(localStorage.getItem("currentLocation")));
   }, []);
 
@@ -38,31 +37,36 @@ const MenuItem = ({ item, index }) => {
   const dispatch = useDispatch();
   const nav = useNavigate();
   
+  
+ 
 
   return (
-    <div
-      className={ms.container__linkList__myLink}
-      key={item.to}
-      onClick={() => {
-        if (!item.isActive) {
-          nav(item.to);
-          if (!subMenu.find((i) => i.isActive)) {
-            dispatch(setFilteredList(products));
+    <Link  style={{textDecoration:'none'}} to={`${item.to}`}>
+      <div
+        className={ms.container__linkList__myLink}
+        key={item.to}
+        onClick={() => {
+          if (!item.isActive) {
+            nav(item.to);
+            if (!subMenu.find((i) => i.isActive)) {
+              dispatch(setFilteredList(products));
+            }
+            dispatch(setActive(index));
+            localStorage.removeItem("currentLocation");
+            localStorage.setItem("currentLocation", index);
           }
-          dispatch(setActive(index));
-          localStorage.removeItem("currentLocation");
-          localStorage.setItem("currentLocation", index);
-        }
-      }}
-    >
-      <li className={item.isActive ? ms.activeBlock : null}>
-        <img
-          className={item.isActive ? ms.active : null}
-          src={item.isActive ? item.active : item.img}
-          alt={"link"}
-        />
-        <span>{item.text}</span>
-      </li>
-    </div>
+        }}
+      >
+        
+        <li className={item.isActive ? ms.activeBlock : null}>
+          <img
+            className={item.isActive ? ms.active : null}
+            src={item.isActive ? item.active : item.img}
+            alt={"link"}
+          />
+          <span>{item.text}</span>
+        </li>
+      </div>
+    </Link>
   );
 };

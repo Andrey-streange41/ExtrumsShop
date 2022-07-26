@@ -8,9 +8,8 @@ export const FavoriteList = () => {
     const favList = useSelector(s=>s.productsList.favoriteList);
     const mode = useSelector(s=>s.toolsPanel.isActiveViewMode);
     useEffect(() => {
-        if(localStorage.getItem("favorList")){
-            // favList = JSON.parse(localStorage.getItem("favList"))
-        }
+        console.log(favList.filter(el=>el.isFavor===true));
+         
     },[])
 
   return (

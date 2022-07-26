@@ -24,8 +24,6 @@ const toolsPanelSlice = createSlice({
         },
         switchFilterMenu:(state,action)=>{
             state.isActiveFilterMenu = !state.isActiveFilterMenu;
-            console.log('ok');
-            
         }
     }
 })

@@ -6,9 +6,13 @@ import ms from "./style.module.scss";
 import { FavoriteList } from "../../components/FavoriteList/index.tsx";
 import { LocationMenu } from "../../components/LocationMenu/index.tsx";
 import { ToolsPanel } from "../../components/ToolsPanel/index.tsx";
-import { ProductCard_v2 } from "../../components/ProductCard_v2/index.tsx";
+import { useSelector } from "react-redux";
+
 
 export const Favorite = () => {
+
+const favFilterList = useSelector(s=>s.productsList.favoriteList);
+
   return (
     <>
       <section className={ms.container}>
@@ -18,6 +22,7 @@ export const Favorite = () => {
           <section className={ms.container__field__content}>
             <LocationMenu />
             <ToolsPanel />
+            
             <FavoriteList />
           </section>
         </section>

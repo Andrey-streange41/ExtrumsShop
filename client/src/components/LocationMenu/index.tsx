@@ -1,40 +1,56 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, Link, useNavigate, useParams } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { goToSubMenu, goToMainMenu } from "../../app/slices/navBarSlice.ts";
+import { setFilteredList } from "../../app/slices/productsListSlice.ts";
 import rightArrow from "../../assets/images/rightArrow.png";
 import ms from "./style.module.scss";
 
 export const LocationMenu = () => {
-  const subMenu = useSelector((s) => s.navBar.subMenu);
-  const activeModalItem=
-    subMenu[subMenu.findIndex((el) => el.isActive)]?.modalItems?.items[
-      subMenu[
-        subMenu.findIndex((el) => el.isActive)
-      ]?.modalItems?.items.findIndex((el) => el.isActive)
-    ]?.category;
-
   const loc = useLocation();
-  const currentPage = loc.pathname.substring(
-    1,
-    loc.pathname.indexOf("/", 1) > 0
-      ? loc.pathname.indexOf("/", 1)
-      : loc.pathname.length
-  );
+  const currentPage = loc.pathname.split("/")[1];
+  const currentCategory = loc.pathname.split("/")[2];
+  const subCategory = loc.pathname.split("/")[4];
+  const productsList = useSelector((s) => s.productsList.productsList);
 
-  useEffect(()=>{
-  
-  if(activeModalItem)
-   { nav(
-      "/" +
-        currentPage +
-        "/" +
-        subMenu[subMenu.findIndex((el) => el.isActive)]?.text + '/subcategory/'+ activeModalItem
-    );}
-  },[activeModalItem])
+  const memoizedCallback = useCallback(
+    () => {
+     makeFilter();
+    },
+    [loc],
+  );
+  useEffect(() => {
+    makeFilter();
+  }, [memoizedCallback]);
 
   const dispatch = useDispatch();
   const nav = useNavigate();
+
+  const makeFilter = () => {
+    if (currentPage && !currentCategory)
+      dispatch(setFilteredList(productsList));
+    else if (currentCategory && !subCategory) {
+      dispatch(
+        setFilteredList(
+          productsList.filter(
+            (el) =>
+              String(el.category).toLowerCase() ===
+              currentCategory.toLowerCase()
+          )
+        )
+      );
+    } else if (subCategory) {
+      dispatch(
+        setFilteredList(
+          productsList.filter(
+            (el) =>
+              String(el.subCategory).toLowerCase() ===
+              String(subCategory).toLowerCase()
+          )
+        )
+      );
+    }
+  };
 
   return (
     <section className={ms.container}>
@@ -44,33 +60,28 @@ export const LocationMenu = () => {
             onClick={() => {
               nav("/" + currentPage);
               dispatch(goToMainMenu());
+              makeFilter();
             }}
             className={ms.container__list__item}
           >
             <span style={{ textTransform: "capitalize" }}>{currentPage} </span>
-            {subMenu.find((i) => i.isActive) ? <img src={rightArrow} /> : null}
+            {currentCategory ? <img src={rightArrow} /> : null}
           </li>
         </Link>
         <li
           className={ms.container__list__item}
           onClick={() => {
-            nav(
-              "/" +
-                currentPage +
-                "/" +
-                subMenu[subMenu.findIndex((el) => el.isActive)]?.text
-            );
+            nav("/" + currentPage + "/" + currentCategory);
             dispatch(goToSubMenu());
+            makeFilter();
           }}
         >
-          <span>{subMenu[subMenu.findIndex((el) => el.isActive)]?.text}</span>
-          {subMenu[
-            subMenu.findIndex((el) => el.isActive)
-          ]?.modalItems.items.findIndex((i) => i.isActive) >= 0 ? (
-            <img src={rightArrow} />
-          ) : null}
+          <span>{currentCategory}</span>
+          {subCategory ? <img src={rightArrow} /> : null}
         </li>
-        <li className={ms.container__list__item}>{activeModalItem}</li>
+        <li className={ms.container__list__item} onClick={makeFilter}>
+          {subCategory}
+        </li>
       </ul>
     </section>
   );

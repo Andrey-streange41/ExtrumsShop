@@ -7,9 +7,8 @@ import birdDown from "../../../assets/images/birdDown.png";
 import birdUp from "../../../assets/images/ddd.png";
 import sortBlack from "../../../assets/images/sortBlack.png";
 import { setActiveItem } from "../../../app/slices/sortSlice.ts";
-import { setSortedList } from "../../../app/slices/sortSlice.ts";
-import { setFilteredList } from "../../../app/slices/productsListSlice.ts";
-import { setProductsList } from "../../../app/slices/productsListSlice.ts";
+import { setFilteredList,setFavoriteList ,setProductsList} from "../../../app/slices/productsListSlice.ts";
+
 
 export const Sort = ({category}) => {
   const isActivePriceMenu = useSelector((s) => s.toolsPanel.isActivePriceMenu);
@@ -48,18 +47,19 @@ const ModalForSort = ({ isActive ,category}) => {
     const modalCommentsItems= useSelector(s=>s.sort.sortItemsForComment);
     const modalProductsItems = useSelector(s=>s.sort.sortItemsForProducts);
     const [targetModalList,setTargetList] = useState([]);
+    
     const filteredList = useSelector(s=>s.productsList.filteredList);
     const productsList = useSelector(s=>s.productsList.productsList);
+    const favoriteList = useSelector(s=>s.productsList.favoriteList);
 
     let sortFilteredList = [...filteredList];
     let sortProductList = [...productsList];
+    let sortFavoriteList = [...favoriteList];
     let commentsSortedFilteredList = [];
     let commentsSortedProductsList = [];
 
     useEffect(()=>{
         setTargetList(category==='products'?modalProductsItems:modalCommentsItems)
-        console.log('change!');
-        
     },[sortFilteredList,sortProductList])
     const dispatch = useDispatch();
 
@@ -68,32 +68,29 @@ const ModalForSort = ({ isActive ,category}) => {
         if(el.name === 'price'){
            sortFilteredList.sort((a,b)=>a.price-b.price);
            sortProductList.sort((a,b)=>a.price-b.price);
-           dispatch(setFilteredList(sortFilteredList ));
-           dispatch(setProductsList(sortProductList));
+           sortFavoriteList.sort((a,b)=>a.price-b.price);
+           
         }
         else if(el.name === 'likes'){
              sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
              sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
-             dispatch(setFilteredList(sortFilteredList ));
-             dispatch(setProductsList(sortProductList));
+             sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
+             
         }
         else if(el.name === 'dislikes'){
             sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
             sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
-            dispatch(setFilteredList(sortFilteredList ));
-            dispatch(setProductsList(sortProductList));
+            sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
         }
         else if(el.name === 'views'){
             sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
             sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
-            dispatch(setFilteredList(sortFilteredList ));
-            dispatch(setProductsList(sortProductList));
+            sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
         }
         else if(el.name === 'favorites'){
             sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
             sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
-            dispatch(setFilteredList(sortFilteredList));
-            dispatch(setProductsList(sortProductList));
+            sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
         }
         else if(el.name === 'name'){
             for (let i = 0; i < sortFilteredList.length; i++) {
@@ -112,8 +109,7 @@ const ModalForSort = ({ isActive ,category}) => {
               commentsSortedProductsList = [...commentsSortedProductsList, element]
           }
           sortProductList=[...commentsSortedProductsList];
-            dispatch(setFilteredList( sortFilteredList));
-            dispatch(setProductsList( sortProductList ));
+            
         }
         else if(el.name === 'date'){
           for (let i = 0; i < sortFilteredList.length; i++) {
@@ -132,8 +128,6 @@ const ModalForSort = ({ isActive ,category}) => {
             commentsSortedProductsList = [...commentsSortedProductsList, element]
         }
         sortProductList=[...commentsSortedProductsList];
-          dispatch(setFilteredList( sortFilteredList));
-          dispatch(setProductsList( sortProductList ));
       }
       else if(el.name === 'time'){
         for (let i = 0; i < sortFilteredList.length; i++) {
@@ -152,9 +146,10 @@ const ModalForSort = ({ isActive ,category}) => {
           commentsSortedProductsList = [...commentsSortedProductsList, element]
       }
       sortProductList=[...commentsSortedProductsList];
-        dispatch(setFilteredList( sortFilteredList));
-        dispatch(setProductsList( sortProductList ));
     }
+      dispatch(setFilteredList(sortFilteredList));
+      dispatch(setProductsList(sortProductList));
+      dispatch(setFavoriteList(sortFavoriteList));
     }
 
   return (
