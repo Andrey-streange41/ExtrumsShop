@@ -28,7 +28,7 @@ export const SubMenu = () => {
         <div
           key={index}
           onClick={() => {
-            if (!item.isActive) {
+           
               nav("/" + "catalog/" + item.text);
 
               dispatch(
@@ -38,7 +38,7 @@ export const SubMenu = () => {
               );
 
               dispatch(selectSubItem(index));
-            }
+           
           }}
           className={
             (item.isActive ? ms.activeBlock + " " : "") + ms.container__item

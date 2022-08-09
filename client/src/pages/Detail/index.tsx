@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
+import { Chart } from "react-google-charts";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Footer } from "../../components/Footer/index.jsx";
@@ -188,7 +189,7 @@ const Menu = ({ item }) => {
     {
       isActive: false,
       text: "Price dynamics",
-      modal: null,
+      modal: <ViewsChart item={item}/>,
     },
   ]);
 
@@ -270,3 +271,33 @@ const Characteristics = ({ item }) => {
     </>
   );
 };
+
+
+
+const ViewsChart =  ({item}) => {
+
+   const [data,setData] = useState ([
+    ["Month", "views"],
+    ["January", Math.random() * (100000 -0) + 0],
+    ["February", Math.random() * (100000 -0) + 0],
+    ["March", Math.random() * (100000 -0) + 0],
+    ["Appril", Math.random() * (100000 -0) + 0],
+    ["May", Math.random() * (100000 -0) + 0],
+    ["June", Math.random() * (100000 -0) + 0],
+    ["July", Math.random() * (100000 -0) + 0],
+  ]);
+
+  const options = {
+    title: "Views",
+    curveType: "function",
+    legend: { position: "bottom" },
+  };
+  return (
+      <Chart chartType={"LineChart"}
+        width={"100%"}
+        height={"400px"}
+        data={data}
+        options={options}
+      />
+  );
+}

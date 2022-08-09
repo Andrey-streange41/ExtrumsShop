@@ -14,7 +14,6 @@ const initialState ={
         { name: "price", isActive: false },
         { name: "favorites", isActive: false },
     ],
-    sortedList:[]
 }
 
 const sortSlice = createSlice({

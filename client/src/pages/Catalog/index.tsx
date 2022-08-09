@@ -26,7 +26,7 @@ export const Catalog = () => {
           <section className={ms.container__field__content}>
             <LocationMenu />
             <ToolsPanel />
-            {!filteredList.length ? "No such category !":<FilteredList/>}
+            {!filteredList.length ? "No such category !":<FilteredList filterList={filteredList}/>}
           </section>
         </section>
       </section>

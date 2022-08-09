@@ -1,3 +1,7 @@
+h1 {
+    width: 100%;
+    text-align: center;
+}
 .container {
     display: flex;
     flex-direction: column;
@@ -15,8 +19,8 @@
     width: 20%;
     min-width: 400px;
     gap: 1em;
-    
-    &__closeModal{
+
+    &__closeModal {
         position: absolute;
         right: 25px;
         top: 25px;
@@ -27,8 +31,9 @@
         display: flex;
     }
 
-    &__list,&__checkboxMenu{
-         flex-direction: column;
+    &__list,
+    &__checkboxMenu {
+        flex-direction: column;
         gap: 0.5em;
         list-style: none;
         margin-left: 3em;
@@ -45,8 +50,6 @@
         align-items: center;
     }
     &__list {
-       
-
         &__item {
             display: flex;
 
@@ -107,8 +110,7 @@
             height: 47px;
         }
     }
-    &__checkboxMenu{
-
+    &__checkboxMenu {
     }
 }
 
@@ -129,12 +131,10 @@
     background: #524f5e;
 }
 
-
-.active{
+.active {
     display: flex;
 }
 
-.unactive{
+.unactive {
     display: none;
 }
-

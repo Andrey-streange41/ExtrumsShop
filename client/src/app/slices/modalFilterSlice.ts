@@ -5,13 +5,20 @@ export interface IModalFilter{
     isOpenPriceMenu:boolean;
     isOpenAddMenu_1:boolean;
     isOpenAddMenu_2:boolean;
+    selectedItems:ISelectedItems[]
+}
+
+export interface ISelectedItems{
+    isActive:boolean;
+    name:string;
 }
 
 const initialState = {
     isOpenCategoryMenu:true,
     isOpenPriceMenu:true,
     isOpenAddMenu_1:true,
-    isOpenAddMenu_2:true
+    isOpenAddMenu_2:true,
+    selectedItems:[]
 }
 
 export const modalFilterSlice = createSlice({
@@ -29,11 +36,17 @@ export const modalFilterSlice = createSlice({
         },
         switchAddMenu2:(state,action)=>{
             state.isOpenAddMenu_2=!state.isOpenAddMenu_2;
-        }
+        },
+        setSelectedItems:(state,action)=>{
+            state.selectedItems = [...state.selectedItems, action.payload]
+        },
+        removeSelectedItem:(state,action)=>{
+            state.selectedItems = state.selectedItems.filter(el=>el.name!==action.payload)
+        },
     }
 })
 
 
-export const { switchCategoryMenu,switchPriceMenu,switchAddMenu1,switchAddMenu2} = modalFilterSlice.actions;
+export const { switchCategoryMenu,switchPriceMenu,switchAddMenu1,switchAddMenu2, setSelectedItems, removeSelectedItem} = modalFilterSlice.actions;
 
 export default modalFilterSlice.reducer;

@@ -13,7 +13,7 @@ import {
   switchAddMenu1,
   switchAddMenu2,
 } from "../../app/slices/modalFilterSlice.ts";
-import { setFilteredList } from "../../app/slices/productsListSlice.ts";
+import { setFilteredList ,setFavorFilterList} from "../../app/slices/productsListSlice.ts";
 
 export const FilterMenu = () => {
   const subMenu = useSelector((s) => s.navBar.subMenu);
@@ -27,7 +27,9 @@ export const FilterMenu = () => {
   const isOpenPriceMenu = useSelector((s) => s.modalFilter.isOpenPriceMenu);
   const isOpenAddMenu_1 = useSelector((s) => s.modalFilter.isOpenAddMenu_1);
   const isOpenAddMenu_2 = useSelector((s) => s.modalFilter.isOpenAddMenu_2);
-  const productsList = useSelector(s=>s.productsList.productsList);
+  const productsList = useSelector((s) => s.productsList.productsList);
+  const filteredList = useSelector((s) => s.productsList.filteredList);
+  const favoriteList = useSelector(s=>s.productsList.favoriteList);
 
   return (
     <section
@@ -45,7 +47,7 @@ export const FilterMenu = () => {
             dispatch(switchCategoryMenu());
           }}
         />
-        <h2>Categories</h2>
+        <h2>Subcategories</h2>
       </section>
       <img
         onClick={() => dispatch(switchFilterMenu())}
@@ -61,26 +63,34 @@ export const FilterMenu = () => {
             : ms.container__list
         }
       >
-        {subMenu
-          .find((i) => i.isActive)
-          ?.modalItems.items.map((item, index) => (
-            <section className={ms.container__list__item} key={index}>
-              <li>
-                <div
-                  className={item.isActive ? ms.radioActive : null}
-                  onClick={() => {
-                    dispatch(
-                      setFilteredList(
-                        productsList.filter((el) => String(el.subCategory).toLowerCase() === String(item.category).toLowerCase())
-                      )
-                    );
-                    dispatch(selectModalItem(index));
-                  }}
-                ></div>
-              </li>
-              <label htmlFor={item.category}>{item.category}</label>
-            </section>
-          ))}
+        {subMenu.find((i) => i.isActive) ? (
+          subMenu
+            .find((i) => i.isActive)
+            ?.modalItems.items.map((item, index) => (
+              <section className={ms.container__list__item} key={index}>
+                <li>
+                  <div
+                    className={item.isActive ? ms.radioActive : null}
+                    onClick={() => {
+                      dispatch(
+                        setFilteredList(
+                          productsList.filter(
+                            (el) =>
+                              String(el.subCategory).toLowerCase() ===
+                              String(item.category).toLowerCase()
+                          )
+                        )
+                      );
+                      dispatch(selectModalItem(index));
+                    }}
+                  ></div>
+                </li>
+                <label htmlFor={item.category}>{item.category}</label>
+              </section>
+            ))
+        ) : (
+          <h1>Select category !</h1>
+        )}
       </ul>
       <div className={ms.border}></div>
       <section className={ms.container__categories}>
@@ -98,7 +108,19 @@ export const FilterMenu = () => {
             : ms.container__price + " " + ms.unactive
         }
       >
-        <input type="text" placeholder="10$" maxLength={6} />
+        <input
+          type="text"
+          placeholder="10$"
+          maxLength={6}
+          onChange={(e) =>
+           { dispatch(
+              setFilteredList(
+                filteredList.filter((el) => el.price >= Number(e.target.value))
+              )
+            );
+            dispatch(setFavorFilterList(favoriteList.filter((el) => el.price >= Number(e.target.value))));}
+          }
+        />
         <div className={ms.line}></div>
         <input type="text" placeholder="156000$" maxLength={6} />
       </section>
@@ -109,7 +131,7 @@ export const FilterMenu = () => {
           alt="bird.png"
           onClick={() => dispatch(switchAddMenu1())}
         />
-        <h2>Connection method</h2>
+        <h2>{subMenu.find((el) => el.isActive)?.characteristics.title} </h2>
       </section>
       <section
         className={
@@ -118,9 +140,15 @@ export const FilterMenu = () => {
             : ms.container__checkboxMenu1 + " " + ms.unactive
         }
       >
-        <CheckBox />
-        <CheckBox />
-        <CheckBox />
+        {subMenu.find((el) => el.isActive) ? (
+          subMenu
+            .find((el) => el.isActive)
+            ?.characteristics.charList.map((item) => (
+              <CheckBox key={item.name} item={{ ...item, text: subMenu.text }} />
+            ))
+        ) : (
+          <h1>Select category !</h1>
+        )}
       </section>
       <div className={ms.border}></div>
       <section className={ms.container__categories}>
@@ -138,11 +166,15 @@ export const FilterMenu = () => {
             : ms.container__checkboxMenu2 + " " + ms.unactive
         }
       >
-        <CheckBox />
-        <CheckBox />
-        <CheckBox />
-        <CheckBox />
-        <CheckBox />
+        {subMenu.find((el) => el.isActive) ? (
+          subMenu
+            .find((el) => el.isActive)
+            ?.purpose.map((item) => (
+              <CheckBox key={item.name} item={{ ...item, text: subMenu.text }} />
+            ))
+        ) : (
+          <h1>Select category !</h1>
+        )}
       </section>
     </section>
   );

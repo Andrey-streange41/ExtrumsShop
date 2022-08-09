@@ -7,7 +7,8 @@ import birdDown from "../../../assets/images/birdDown.png";
 import birdUp from "../../../assets/images/ddd.png";
 import sortBlack from "../../../assets/images/sortBlack.png";
 import { setActiveItem } from "../../../app/slices/sortSlice.ts";
-import { setFilteredList,setFavoriteList ,setProductsList} from "../../../app/slices/productsListSlice.ts";
+import {setFavorFilterList ,setFilteredList,setFavoriteList ,setProductsList} from "../../../app/slices/productsListSlice.ts";
+
 
 
 export const Sort = ({category}) => {
@@ -51,10 +52,12 @@ const ModalForSort = ({ isActive ,category}) => {
     const filteredList = useSelector(s=>s.productsList.filteredList);
     const productsList = useSelector(s=>s.productsList.productsList);
     const favoriteList = useSelector(s=>s.productsList.favoriteList);
+    const favorFilterList = useSelector(s=>s.productsList.favorFilterList);
 
     let sortFilteredList = [...filteredList];
     let sortProductList = [...productsList];
     let sortFavoriteList = [...favoriteList];
+    let sortFavorFilterList=[...favorFilterList];
     let commentsSortedFilteredList = [];
     let commentsSortedProductsList = [];
 
@@ -69,28 +72,31 @@ const ModalForSort = ({ isActive ,category}) => {
            sortFilteredList.sort((a,b)=>a.price-b.price);
            sortProductList.sort((a,b)=>a.price-b.price);
            sortFavoriteList.sort((a,b)=>a.price-b.price);
-           
+           sortFavorFilterList.sort((a,b)=>a.price-b.price);
         }
         else if(el.name === 'likes'){
              sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
              sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
              sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
-             
+             sortFavorFilterList.sort((a,b)=>a.userComunication.find(el=>el.name==='like').amount-b.userComunication.find(el=>el.name==='like').amount);
         }
         else if(el.name === 'dislikes'){
             sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
             sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
             sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
-        }
+            sortFavorFilterList.sort((a,b)=>a.userComunication.find(el=>el.name==='dislike').amount-b.userComunication.find(el=>el.name==='dislike').amount);
+          }
         else if(el.name === 'views'){
             sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
             sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
             sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
-        }
+            sortFavorFilterList.sort((a,b)=>a.userComunication.find(el=>el.name==='views').amount-b.userComunication.find(el=>el.name==='views').amount);
+          }
         else if(el.name === 'favorites'){
             sortFilteredList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
             sortProductList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
             sortFavoriteList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
+            sortFavorFilterList.sort((a,b)=>a.userComunication.find(el=>el.name==='favorite').amount-b.userComunication.find(el=>el.name==='favorite').amount);
         }
         else if(el.name === 'name'){
             for (let i = 0; i < sortFilteredList.length; i++) {
@@ -150,6 +156,7 @@ const ModalForSort = ({ isActive ,category}) => {
       dispatch(setFilteredList(sortFilteredList));
       dispatch(setProductsList(sortProductList));
       dispatch(setFavoriteList(sortFavoriteList));
+      dispatch(setFavorFilterList(sortFavorFilterList));
     }
 
   return (

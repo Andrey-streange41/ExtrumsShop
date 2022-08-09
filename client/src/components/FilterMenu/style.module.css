@@ -1,4 +1,9 @@
 @charset "UTF-8";
+h1 {
+  width: 100%;
+  text-align: center;
+}
+
 .container {
   display: flex;
   flex-direction: column;

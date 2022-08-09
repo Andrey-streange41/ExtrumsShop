@@ -21,6 +21,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 2em;
+  position: relative;
 }
 
 .container__field__content h1 {
@@ -34,24 +35,28 @@
 .container__field__content__body {
   display: flex;
   width: 100%;
-  min-height: 60vh;
+  max-height: 70vh;
 }
 
 .container__field__content__body__avatar {
+  margin-top: 2em;
   width: 50%;
-  min-height: 60vh;
+  max-height: 50vh;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   gap: 2.5em;
 }
 
 .container__field__content__body__avatar img {
-  min-width: 40%;
-  height: 70%;
+  width: 50%;
+  height: 100%;
+  border-radius: 50%;
 }
 
 .container__field__content__body__avatar__button {
+  position: relative;
   min-height: 50px;
   min-width: 50%;
   font-family: "Inter";
@@ -67,5 +72,48 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.3s;
+}
+
+.container__field__content__body__avatar__button:hover {
+  opacity: 1;
+}
+
+.container__field__content__body__form {
+  width: 40%;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+}
+
+.selectFile {
+  cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.selectFile:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+.logout {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 2em;
+  font-family: Inter;
+  font-weight: 600;
+}
+
+.logout:hover {
+  text-decoration: underline;
   cursor: pointer;
 }

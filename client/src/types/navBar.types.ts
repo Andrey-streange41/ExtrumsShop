@@ -5,8 +5,18 @@ export interface INavBarSubItem {
   active: string;
   isActive: boolean;
   modalItems: IModalItems;
+  purpose: IPurpose[];
+  characteristics:IChar;
 }
 
+export interface IChar{
+  title:string,
+  charList:IPurpose[]
+}
+export interface IPurpose{
+  name:string,
+  isActive:boolean
+}
 export interface IModalItems {
   title: string;
   items: IModalItem[];

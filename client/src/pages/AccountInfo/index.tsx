@@ -1,31 +1,304 @@
-import React from 'react';
-import { Footer } from '../../components/Footer';
-import Header from '../../components/Header/Header.jsx';
-import { NavBar } from '../../components/NavBar';
-import ms from './style.module.scss';
-import avatar from '../../assets/images/Avatar.png'
+import React, { ChangeEvent, useEffect, useState, FC } from "react";
+import { Footer } from "../../components/Footer";
+import Header from "../../components/Header/Header.jsx";
+import { NavBar } from "../../components/NavBar";
+import ms from "./style.module.scss";
+import avatar from "../../assets/images/Avatar.png";
+import { Input } from "../../components/UI/Input/Input.tsx";
+import { CheckBox } from "../../components/UI/CheckBox/CheckBox.tsx";
+import { Button } from "../../components/UI/Button/index.tsx";
+import { setUserData, updateUser } from "../../app/slices/userSlice.ts";
+import jwt_decode from 'jwt-decode';
+import * as yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setAuth } from "../../app/slices/userSlice.ts";
 
-export const AccountInfo = () => {
+let schema = yup.object().shape({
+  firstname: yup.string().max(20),
+  lastname: yup.string().max(20),
+  email: yup.string().email().max(40),
+  password: yup.string(),
+  tel: yup.string().min(10).max(10),
+});
+
+interface IUser {
+  firstname: string;
+  lastname: string;
+  email: string;
+  tel: string;
+  password: string;
+  passwordConfirm: string;
+  updateAgrements: boolean;
+  avatar: any;
+  id: string;
+}
+
+export interface IError {
+  name: string;
+  error: boolean;
+  message: string | null;
+}
+
+export const AccountInfo: FC = () => {
+  const userData = useSelector((s) => s.user.userData);
+  const dispatch = useDispatch();
+  const nav = useNavigate();
+  const [avatarFile, setAvatar] = useState<string | null | Blob>(avatar);
+  const [sendingURL,setSendingURL] = useState<string|null>();
+  const [user, setUser] = useState<IUser>({
+    firstname: "",
+    lastname: "",
+    email: "",
+    tel: "",
+    password: "",
+    passwordConfirm: "",
+    updateAgrements: false,
+    avatar: avatar,
+    id: "",
+  });
+  const isAuth = useSelector((s) => s.user.isAuth);
+
+  useEffect(() => {
+    if (!isAuth) nav("/login");
+    else setUser({ ...userData, passwordConfirm: userData.password });
+    
+    
+    
+  }, [userData]);
+
+  const [errors, setErrors] = useState<IError[]>([
+    { name: "firstname", error: true, message: "" },
+    { name: "lastname", error: false, message: "" },
+    { name: "email", error: true, message: "" },
+    { name: "password", error: false, message: "" },
+    { name: "tel", error: true, message: "" },
+  ]);
+
+  const handleSelectFile = (e: ChangeEvent<any>) => {
+    setAvatar(window.URL.createObjectURL(e.target.files[0]));
+    dispatch(setUserData({...userData,avatar:window.URL.createObjectURL(e.target.files[0])}));
+    setSendingURL(e.target.files[0]);
+    
+  };
+  const handleClick = () => {
+    setUser({ ...user, updateAgrements: !user.updateAgrements });
+  };
+  const handleChange = (e: ChangeEvent<Input>) => {
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
+  const resetError = () => {
+    const buffer: IError[] = errors.map((el) => {
+      if (el.name === "password") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer);
+    const buffer2: IError[] = errors.map((el) => {
+      if (el.name === "email") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer2);
+    const buffer3: IError[] = errors.map((el) => {
+      if (el.name === "firstname" || el.name === "lastname") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer3);
+    const buffer4: IError[] = errors.map((el) => {
+      if (el.name === "tel") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer4);
+  };
+  const handleSubmit = async () => {
+    try {
+      const result = await schema.validate(user);
+      resetError();
+      if (result) {
+        if (user.password !== user.passwordConfirm) {
+          const buffer: IError[] = errors.map((el) => {
+            if (el.name === "password") {
+              el.message = "Password must be a similar , try agan !";
+              el.error = true;
+            }
+            return el;
+          });
+          setErrors(buffer);
+          return;
+        } else {
+          const buffer: IError[] = errors.map((el) => {
+            if (el.name === "password") {
+              el.message = null;
+              el.error = false;
+            }
+            return el;
+          });
+          setErrors(buffer);
+        }
+       
+          const id  = jwt_decode(localStorage.getItem('token')).id;
+          const formData = new FormData();
+          formData.append('firstname',user.firstname);
+          formData.append('agrements',user.updateAgrements);
+          formData.append("lastname",user.lastname);
+          formData.append("tel",user.tel);
+          formData.append("email",user.email);
+          formData.append("password",user.password);
+          formData.append("updateAgrements", JSON.stringify(user.updateAgrements));
+          formData.append("avatar", sendingURL);
+          formData.append("id",JSON.stringify(id));
+            
+          dispatch(updateUser(formData)).unwrap();
+          dispatch(setUserData({...user}));
+      }
+    } catch (err) {
+      resetError();
+      if (String(err.message).includes("password")) {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "password") {
+            el.message = err.message;
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      } else if (String(err.message).includes("email")) {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "email") {
+            el.message = err.message;
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      } else if (user.firstname === "" || user.lastname === "") {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "firstname" || el.name === "lastname") {
+            el.message = "First name and last name is required !";
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      } else if (String(err.message).includes("tel")) {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "tel") {
+            el.message = err.message;
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      }
+    }
+  };
+
+  const logout = () => {
+    dispatch(setAuth(false));
+    dispatch(setUserData({}));
+    localStorage.removeItem('token');
+    nav('/');
+  }
+
   return (
     <>
-    <section className={ms.container}>
-         <Header />
-         <section className={ms.container__field}>
-         <NavBar />
-         <section className={ms.container__field__content}>
-            <h1>Account Setting</h1>  
-            <section className={ms.container__field__content__body} >
-                <section className={ms.container__field__content__body__avatar}>
-                    <img src={avatar} alt="avatar.png" />
-                    <section className={ms.container__field__content__body__avatar__button}>
-                        Change Foto
-                    </section>
+      <section className={ms.container}>
+        <Header />
+        <section className={ms.container__field}>
+          <NavBar />
+          <section className={ms.container__field__content}>
+            <h1>Account Setting</h1>
+            <section className={ms.container__field__content__body}>
+              <section className={ms.container__field__content__body__avatar}>
+                <img
+                  src={ String(userData.avatar).includes('null')? avatar :userData.avatar }
+                  alt="avatar.png"
+                />
+                <section
+                  className={ms.container__field__content__body__avatar__button}
+                >
+                  Change Foto
+                  <input
+                    accept=".jpg, .jpeg, .png .webp"
+                    type="file"
+                    className={ms.selectFile}
+                    name={"avatarFile"}
+                    onChange={handleSelectFile}
+                  />
                 </section>
+              </section>
+              <section className={ms.container__field__content__body__form}>
+                <Input
+                  error={errors.find((el) => el.name === "firstname")}
+                  value={user.firstname}
+                  name={"firstname"}
+                  handleChange={handleChange}
+                  type={"text"}
+                  label={"First name"}
+                />
+                <Input
+                  error={errors.find((el) => el.name === "lastname")}
+                  value={user.lastname}
+                  name={"lastname"}
+                  handleChange={handleChange}
+                  type={"text"}
+                  label={"Last name"}
+                />
+                <Input
+                  error={errors.find((el) => el.name === "email")}
+                  value={user.email}
+                  name={"email"}
+                  handleChange={handleChange}
+                  type={"email"}
+                  label={"Email address"}
+                />
+                <Input
+                  error={errors.find((el) => el.name === "tel")}
+                  value={user.tel}
+                  name={"tel"}
+                  handleChange={handleChange}
+                  type={"tel"}
+                  label={"Phone"}
+                />
+                <Input
+                  error={errors.find((el) => el.name === "password")}
+                  value={user.password}
+                  name={"password"}
+                  handleChange={handleChange}
+                  type={"password"}
+                  label={"New password"}
+                />
+                <Input
+                  value={user.passwordConfirm}
+                  name={"passwordConfirm"}
+                  handleChange={handleChange}
+                  type={"password"}
+                  label={"Password confirmation"}
+                />
+                <CheckBox
+                  isActive={user.updateAgrements}
+                  handleClick={handleClick}
+                  label="Get updates on our shop news and promotions"
+                />
+                <Button handleSubmit={handleSubmit} text="Save All Changes" />
+                <section onClick={logout} className={ms.logout}>Logout</section>
+              </section>
             </section>
+          </section>
         </section>
-         </section>
-    </section>
-    <Footer/>
+      </section>
+      <Footer />
     </>
-  )
-}
+  );
+};

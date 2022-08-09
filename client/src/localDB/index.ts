@@ -14,6 +14,8 @@ import activePc from "../assets/images/activePc.png";
 import dron from "../assets/images/dron.webp";
 import laptop1 from "../assets/images/laptop1.jpg";
 import { IProduct } from "../types/favoriteList.types";
+import admin from '../assets/images/admin.png';
+import adminActive from '../assets/images/adminActive.png'
 import {
   INavBarSubItem,
   IModalItems,
@@ -80,6 +82,12 @@ export const navbarParrentList: INavBarItem[] = [
     img: home,
     active: activeHome,
     isActive: false,
+  },{
+    to:"/admin",
+    text:"admin",
+    img:admin,
+    active:adminActive,
+    isActive:false
   },
   {
     to: "/favorites",
@@ -95,6 +103,7 @@ export const navbarParrentList: INavBarItem[] = [
     active: activeCategory,
     isActive: false,
   },
+  
 ];
 
 export const modalItems: IModalItems[] = [
@@ -129,6 +138,7 @@ export const modalItems: IModalItems[] = [
     ],
   },
 ];
+
 export const subMenu: INavBarSubItem[] = [
   {
     text: "cars",
@@ -137,6 +147,22 @@ export const subMenu: INavBarSubItem[] = [
     to: "",
     isActive: false,
     modalItems: modalItems[1],
+    purpose:[
+      {name:'For travel', isActive:true},
+      {name:'For shipping', isActive:false},
+      {name:'For racing', isActive:true},
+      {name:'For party', isActive:false},
+      {name:'For security', isActive:false},
+    ],
+    characteristics:{
+      title:'Color',
+      charList:[
+        {name:'Red',isActive:false},
+        {name:'Silver',isActive:false},
+        {name:'Gold',isActive:false},
+        {name:'Blue',isActive:false},
+      ]
+    }
   },
   {
     text: "electronics",
@@ -145,6 +171,21 @@ export const subMenu: INavBarSubItem[] = [
     to: "",
     isActive: false,
     modalItems: modalItems[0],
+    purpose:[
+      {name:'For video', isActive:true},
+      {name:'For fun', isActive:false},
+      {name:'For photo', isActive:true},
+      {name:'For home life', isActive:false},
+      {name:'For game', isActive:false},
+    ],
+    characteristics:{
+      title:'Сonnection method',
+      charList:[
+        {name:'Wireless',isActive:false},
+        {name:'Wires',isActive:false},
+        
+      ]
+    }
   },
   {
     text: "clothing",
@@ -153,6 +194,21 @@ export const subMenu: INavBarSubItem[] = [
     to: "",
     isActive: false,
     modalItems: modalItems[2],
+    purpose:[
+      {name:'For summer', isActive:true},
+      {name:'For winter', isActive:false},
+      {name:'For othem', isActive:true},
+      {name:'For spring', isActive:false},
+    ],
+    characteristics:{
+      title:'Color',
+      charList:[
+        {name:'Red',isActive:false},
+        {name:'Silver',isActive:false},
+        {name:'Gold',isActive:false},
+        {name:'Blue',isActive:false},
+      ]
+    }
   },
 ];
 
@@ -225,14 +281,19 @@ export const tmpProductList: IProduct[] = [
         },
       },
     ],
+    purpose:[
+      {name:'For video', isActive:true},
+      {name:'For fun', isActive:false},
+      {name:'For photo', isActive:true},
+      {name:'For home life', isActive:false},
+      {name:'For work', isActive:false},
+    ],
     category: "electronics",
     subCategory: "Drons",
     img: dron,
     title: "Eachine E58 quadcopter drone Wi-fi with 720P camera",
     design:
       "You can take a drone with a compact size with you everywhere and at any time of the day.",
-    connectionType:
-      "The inserted system allows you to use the remote control, as well as a special add-on for smartphones on Android and iOS. ",
     price: 800,
 
     discount: false,
@@ -315,14 +376,19 @@ export const tmpProductList: IProduct[] = [
         },
       },
     ],
+    purpose:[
+      {name:'For game', isActive:true},
+      {name:'For fun', isActive:true},
+      {name:'For photo', isActive:false},
+      {name:'For home life', isActive:false},
+      {name:'For work', isActive:false},
+    ],
     category: "electronics",
     subCategory: "Laptops",
     img: laptop1,
     title: "Laptop HP 17-ca2017nm",
     design:
       "Dijagonala monitora u incima 17.3,Rezolucija monitora HD+ 1600x900",
-    connectionType: `The inserted system allows you to use the remote control, as well as a special 
-      add-on for smartphones on Android and iOS. `,
     price: 1228,
     discount: false,
     userComunication: [
@@ -390,6 +456,13 @@ export const tmpProductList: IProduct[] = [
     id: "990124g",
     isFavor: false,
     priceDynamic: {},
+    purpose:[
+      {name:'For video', isActive:true},
+      {name:'For fun', isActive:true},
+      {name:'For photo', isActive:true},
+      {name:'For home life', isActive:false},
+      {name:'For work', isActive:false},
+    ],
     comments: [
       {
         owner: "Daniil",
@@ -411,7 +484,6 @@ export const tmpProductList: IProduct[] = [
     title: "Smartphone Samsung Galaxy A52 4",
     design:
       "Several qualities of the Samsung Galaxy A52 screen are clearly visible from the first seconds",
-    connectionType: "Capacitive battery in Samsung Galaxy A52",
     price: 500,
     discount: false,
     userComunication: [
@@ -446,6 +518,13 @@ export const tmpProductList: IProduct[] = [
     ],
   },
   {
+    purpose:[
+      {name:'For travel', isActive:true},
+      {name:'For shipping', isActive:false},
+      {name:'For racing', isActive:true},
+      {name:'For party', isActive:false},
+      {name:'For security', isActive:false},
+    ],
     characteristics: {
       list: [
         { name: "Race:", info: "160 тис. км" },
@@ -512,7 +591,6 @@ export const tmpProductList: IProduct[] = [
     title: "BMW X6",
     design:
       "Two sets of R22 wide rims on new tires and R19 on winter tires, or R20 new rims on absolutely new tires.",
-    connectionType: "Capacitive battery in Samsung Galaxy A52",
     price: 22500,
     discount: false,
 
@@ -547,7 +625,6 @@ export const tmpProductList: IProduct[] = [
       },
     ],
   },
-  
   {
     characteristics: {
       list: [
@@ -567,6 +644,10 @@ export const tmpProductList: IProduct[] = [
         { name: "Made in:", info: `Turkey` },
       ],
     },
+    purpose:[{name:'For summer', isActive:true},
+      {name:'For winter', isActive:false},
+      {name:'For othem', isActive:false},
+      {name:'For spring', isActive:true}],
     productImages: [
       String(polo_tshort[0]),
       String(polo_tshort[1]),
@@ -604,7 +685,6 @@ export const tmpProductList: IProduct[] = [
     title: "Polo Ralph Lauren Graphic Tee in white",
     design:
       "Two sets of R22 wide rims on new tires and R19 on winter tires, or R20 new rims on absolutely new tires.",
-    connectionType: "Capacitive battery in Samsung Galaxy A52",
     price: 100,
     discount: false,
 

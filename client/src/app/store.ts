@@ -5,6 +5,7 @@ import productsListSlice from './slices/productsListSlice.ts';
 import searchSlice from './slices/searchSlice.ts';
 import sortSlice from './slices/sortSlice.ts';
 import toolsPanelSlice from './slices/toolsPanelSlice.ts';
+import userSlice from './slices/userSlice.ts';
 
 
 export const store = configureStore({
@@ -14,7 +15,8 @@ export const store = configureStore({
         toolsPanel: toolsPanelSlice,
         modalFilter: modalFilterSlice,
         sort: sortSlice,
-        search: searchSlice
+        search: searchSlice,
+        user:userSlice
     },
   })
 

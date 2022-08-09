@@ -6,11 +6,12 @@ import { setNavBar } from "../../app/slices/navBarSlice.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { setActive } from "../../app/slices/navBarSlice.ts";
 import { setFilteredList } from "../../app/slices/productsListSlice.ts";
-import { selectSubItem } from "../../app/slices/navBarSlice.ts";
+import { selectSubItem,offAllSubCategory } from "../../app/slices/navBarSlice.ts";
 
 export const NavBar = () => {
   const dispatch = useDispatch();
   const items = useSelector((s) => s.navBar.items);
+  const isAuth = useSelector(s=>s.user.isAuth);
 
   useEffect(() => {
     if (localStorage.getItem("currentLocation")&&items.findIndex(el=>el.isActive)===-1)
@@ -20,9 +21,13 @@ export const NavBar = () => {
   return (
     <section className={ms.container}>
       <ul className={ms.container__linkList}>
-        {items.map((item, index) => (
+        {items.map((item, index) => {
+          if(index===1&&!isAuth){
+            return;
+          }
+          return (
           <MenuItem key={index} item={item} index={index} />
-        ))}
+        )})}
       </ul>
       <section className={ms.container__subMenu}>
         <SubMenu />
@@ -46,6 +51,8 @@ const MenuItem = ({ item, index }) => {
         className={ms.container__linkList__myLink}
         key={item.to}
         onClick={() => {
+    
+          dispatch(offAllSubCategory());
           if (!item.isActive) {
             nav(item.to);
             if (!subMenu.find((i) => i.isActive)) {

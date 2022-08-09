@@ -41,11 +41,22 @@ const productsListSlice = createSlice({
         filterListEl.isActive = true;
         ++filterListEl.amount;
       }
+      const filterFavorListEl = state.favorFilterList
+        .find((el) => el.id === action.payload.id)
+        ?.userComunication.find((el) => el.name === "favorite");
+      if (filterFavorListEl) {
+          filterFavorListEl.isActive = true;
+        ++filterFavorListEl.amount;
+      }
     },
     removeFromFavoriteList: (state, action) => {
       state.favoriteList = state.favoriteList.filter(
         (i) => i.title !== action.payload.title
       );
+      state.favorFilterList = state.favorFilterList.filter(
+        (i) => i.title !== action.payload.title
+      );
+
       const prodList = state.productsList.find(
         (el) => el.id === action.payload.id
       );
@@ -76,6 +87,16 @@ const productsListSlice = createSlice({
         filtFavor.isActive = false;
         --filtFavor.amount;
       }
+      const filterFavorL = state.favorFilterList.find(
+        (el) => el.id === action.payload.id
+      );
+      const filtFavCom = filterFavorL?.userComunication?.find(
+        (el) => el.name === "favorite"
+      );
+      if (filtFavCom) {
+        filtFavCom.isActive = false;
+        --filtFavCom.amount;
+      }
     },
     setFilteredList: (state, action) => {
       state.filteredList = [...action.payload];
@@ -85,6 +106,9 @@ const productsListSlice = createSlice({
     },
     setFavoriteList: (state, action) => {
       state.favoriteList = [...action.payload];
+    },
+    setFavorFilterList:(state,action)=>{
+      state.favorFilterList = action.payload;
     },
     likeCliked: (state, action) => {
       const element = state.productsList.find((el) => el.id === action.payload);
@@ -112,6 +136,17 @@ const productsListSlice = createSlice({
       const favorElDislikeCom = favoriteListElement?.userComunication.find(
         (el) => el.name === "dislike"
       );
+
+      const favorFilterEl = state.favorFilterList.find(
+        (el) => el.id === action.payload
+      );
+      const favorFilterElComLike = favorFilterEl?.userComunication.find(
+        (el) => el.name === "like"
+      );
+      const favorFilterElComDislike = favorFilterEl?.userComunication.find(
+        (el) => el.name === "dislike"
+      );
+
       if (!elementLikeCommunication.isActive) {
         if (elementLikeCommunication.amount) {
           ++elementLikeCommunication.amount;
@@ -138,6 +173,14 @@ const productsListSlice = createSlice({
           ++favorElementUserCom.amount;
           favorElementUserCom.isActive = true;
         }
+        if (favorFilterElComLike && favorFilterElComLike.amount) {
+          if (favorFilterElComDislike.isActive) {
+            favorFilterElComDislike.isActive = false;
+            --favorFilterElComDislike.amount;
+          }
+          ++favorFilterElComLike.amount;
+          favorFilterElComLike.isActive = true;
+        }
       } else {
         if (filteredListLikeCom && filteredListLikeCom.amount) {
           --filteredListLikeCom.amount;
@@ -150,6 +193,10 @@ const productsListSlice = createSlice({
         if (elementLikeCommunication && elementLikeCommunication.amount) {
           --elementLikeCommunication.amount;
           elementLikeCommunication.isActive = false;
+        }
+        if (favorFilterElComLike && favorFilterElComLike.amount) {
+          --favorFilterElComLike.amount;
+          favorFilterElComLike.isActive = false;
         }
       }
     },
@@ -182,6 +229,16 @@ const productsListSlice = createSlice({
         (el) => el.name === "like"
       );
 
+      const favoriteFilterListElement = state.favorFilterList.find(
+        (el) => el.id === action.payload
+      );
+      const favorFilterElDislikeCom = favoriteFilterListElement?.userComunication.find(
+        (el) => el.name === "dislike"
+      );
+      const favorFilterElLikekeCom = favoriteFilterListElement?.userComunication.find(
+        (el) => el.name === "like"
+      );
+
       if (!elementDislikeCommunication.isActive) {
         if (elementDislikeCommunication) {
           ++elementDislikeCommunication.amount;
@@ -211,6 +268,14 @@ const productsListSlice = createSlice({
           ++favorElDislikeCom.amount;
           favorElDislikeCom.isActive = true;
         }
+        if (favorFilterElDislikeCom) {
+          if (favorFilterElLikekeCom && favorFilterElLikekeCom.isActive) {
+            favorFilterElLikekeCom.isActive = false;
+            --favorFilterElLikekeCom.amount;
+          }
+          ++favorFilterElDislikeCom.amount;
+          favorFilterElDislikeCom.isActive = true;
+        }
       } else {
         if (elementDislikeCommunication) {
           --elementDislikeCommunication.amount;
@@ -223,6 +288,10 @@ const productsListSlice = createSlice({
         if (favorElDislikeCom) {
           --favorElDislikeCom.amount;
           favorElDislikeCom.isActive = false;
+        }
+        if (favorFilterElDislikeCom) {
+          --favorFilterElDislikeCom.amount;
+          favorFilterElDislikeCom.isActive = false;
         }
       }
     },
@@ -246,6 +315,9 @@ const productsListSlice = createSlice({
         ++favorListElement.userComunication.find((el) => el.name === "views")
           .amount;
     },
+    setComment:(state,action)=>{
+      state.productsList.find(el=>el.id===action.payload.id).comments = [...state.productsList.find(el=>el.id===action.payload.id).comments,action.payload.data]
+    }
   },
 });
 
@@ -258,6 +330,8 @@ export const {
   viewsUp,
   setProductsList,
   setFavoriteList,
+  setFavorFilterList,
+  setComment
 } = productsListSlice.actions;
 
 export default productsListSlice.reducer;

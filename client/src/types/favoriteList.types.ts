@@ -20,10 +20,12 @@ export interface ICharct{
   info:string
 }
 
+
+
 export interface ICharacteristics {
   list:ICharct[],
   subList:ICharct[],
-  cardInfo:ICharct[]
+  cardInfo:ICharct[],
 }
 
 export interface IUserInterfaceItem{
@@ -32,6 +34,11 @@ export interface IUserInterfaceItem{
   name:string,
   img2:string,
   isActive:boolean
+}
+
+export interface IPurpose{
+  name:string;
+  isActive:boolean;
 }
 
 export interface IProduct {
@@ -47,9 +54,9 @@ export interface IProduct {
   img: string,
   title: string,
   design:string,
-  connectionType:string,
   price: number,
   discount:boolean,
-  userComunication:IUserInterfaceItem[]
+  userComunication:IUserInterfaceItem[],
+  purpose:IPurpose[]
 
 }
