@@ -1,0 +1,18 @@
+.container{
+   width: 80%;
+  
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2em;
+
+    li{
+        text-transform: capitalize;
+        &:hover{
+            text-decoration: line-through;
+            cursor: pointer;
+            color: #766ed3;
+        }
+    }
+}

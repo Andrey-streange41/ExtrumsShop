@@ -1,0 +1,17 @@
+.characteristics {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.characteristics input {
+  max-width: 70%;
+  margin-top: 3em;
+  border: solid #766ed3 2px;
+  outline: none;
+  padding: 5px;
+  border-radius: 10px;
+}

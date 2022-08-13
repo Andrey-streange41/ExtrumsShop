@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Chart } from "react-google-charts";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -10,44 +10,74 @@ import ms from "./style.module.scss";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
+import { userCommunication } from "../../assets/images/index.js";
 import birka from "../../assets/images/birka.png";
-import {
-  likeCliked,
-  dislikeCliked,
-  removeFromFavoriteList,
-  addToFavorite,
-} from "../../app/slices/productsListSlice.ts";
 import { CommentsList } from "./CommentsList/index.tsx";
+import {
+  updateProductsThunk,
+  addToFavoritesThunk,
+  removeFromFavoriteListThunk,
+} from "../../app/slices/productsListSlice.ts";
+import { getCommentsThunk } from "../../app/slices/commentsSlice.ts";
 
-export const Detail = () => {
+export const Detail: FC = () => {
   const { id } = useParams();
-  const productList = useSelector((s) => s.productsList.productsList);
-  const item = productList.filter((item) => item.id === id)[0];
+  const productList = useSelector((s) => s.productsList.testList);
+  const item = productList.filter((item) => item.id === Number(id))[0];
   const dispatch = useDispatch();
-  const list = useSelector((s) => s.productsList.favoriteList);
+  const isAuth = useSelector((s) => s.user.isAuth);
+  const [coms, setComs] = useState([]);
+  const user = useSelector((s) => s.user.userData);
+  const loading = useSelector((s) => s.productsList.loading);
+  const comments =useSelector(s=>s.comments.comments);
 
-  const addToFavoriteList = () => {
-    if (list.findIndex((el) => el.id === item.id) >= 0) {
-      dispatch(removeFromFavoriteList({ ...item, isFavor: false }));
+  const handleFavoriteClick = () => {
+    if (!isAuth) {
+      alert("You must sign in to you account for this option !");
       return;
     }
-    for (let i = 0; i < list.length; i++) {
-      const element = list[i];
-      if (element.title === item.title) return;
+    dispatch(
+      updateProductsThunk({
+        name: "favorites",
+        id: item.id,
+      })
+    )
+      .then((data) => {
+        const favoriteState = data.payload
+          .find((el) => el.id === item.id)
+          .userComunications.find((el) => el.name === "favorites").isActive;
+        if (favoriteState === true) {
+          dispatch(
+            addToFavoritesThunk({ productId: item.id, userId: user.id })
+          );
+        } else {
+          dispatch(
+            removeFromFavoriteListThunk({ productId: item.id, userId: user.id })
+          );
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
+  useEffect(() => {
+
+    dispatch(getCommentsThunk(item?.id)).then((data)=>{console.log(data.data,'DETAIL*');
+    })
+    
+    if (loading === "idle") {
+      setComs(
+        [...item?.userComunications]?.sort((a, b) =>
+          String(a.name).localeCompare(b.name)
+        )
+      );
     }
+  }, [item?.comments]);
 
-    localStorage.setItem("favorList", JSON.stringify([...list, item]));
-    dispatch(addToFavorite({ ...item, isFavor: true }));
-  };
-
-  const removeFromFavorite = () => {
-    let buffer = JSON.parse(localStorage.getItem("favorList"));
-    buffer = buffer.filter((i) => i.title !== item.title);
-    localStorage.setItem("favorList", JSON.stringify(buffer));
-    dispatch(removeFromFavoriteList(item));
-  };
-
-  return (
+  return loading !== "idle" && !item ? (
+    <h1>loading ...</h1>
+  ) : (
     <>
       <section className={ms.container}>
         <Header />
@@ -59,14 +89,16 @@ export const Detail = () => {
                 <section
                   className={ms.container__field__content__row1__galery__swiper}
                 >
-                  <ProductImagesSlider images={item.productImages} />
+                  <ProductImagesSlider
+                    images={item?.images ? JSON.parse(item.images) : []}
+                  />
                 </section>
               </section>
               <section className={ms.container__field__content__row1__cardInfo}>
                 <section
                   className={ms.container__field__content__row1__cardInfo__UI}
                 >
-                  {item.userComunication.map((el, index) => (
+                  {coms.map((el, index) => (
                     <section
                       key={index}
                       className={
@@ -75,38 +107,63 @@ export const Detail = () => {
                     >
                       <img
                         onClick={
-                          el.name === "like"
+                          el.name === "likes"
                             ? () => {
-                                dispatch(likeCliked(item.id));
+                                if (!isAuth) {
+                                  alert(
+                                    "You must sign in to you account for this option !"
+                                  );
+                                  return;
+                                }
+                                dispatch(
+                                  updateProductsThunk({
+                                    name: "likes",
+                                    id: item.id,
+                                  })
+                                );
                               }
-                            : el.name === "dislike"
-                            ? () => dispatch(dislikeCliked(item.id))
-                            : el.name === "favorite" &&
-                              list.findIndex((el) => el.id === item.id) >= 0
-                            ? removeFromFavorite
-                            : el.name === "favorite" &&
-                              list.findIndex((el) => el.id === item.id) < 0
-                            ? addToFavoriteList
+                            : el.name === "dislikes"
+                            ? () => {
+                                if (!isAuth) {
+                                  alert(
+                                    "You must sign in to you account for this option !"
+                                  );
+                                  return;
+                                }
+                                dispatch(
+                                  updateProductsThunk({
+                                    name: "dislikes",
+                                    id: item.id,
+                                  })
+                                );
+                              }
+                            : el.name === "favorites"
+                            ? handleFavoriteClick
                             : () => {}
                         }
                         src={
-                          el.name === "like" && el.isActive
-                            ? el.img2
-                            : el.name === "like" && !el.isActive
-                            ? el.img
-                            : el.name === "dislike" && el.isActive
-                            ? el.img
-                            : el.name === "dislike" && !el.isActive
-                            ? el.img2
-                            : el.name === "favorite" &&
-                              list.findIndex((el) => el.id === item.id) < 0
-                            ? el.img2
-                            : el.name === "favorite" &&
-                              list.findIndex((el) => el.id === item.id) >= 0
-                            ? el.img
-                            : el.img
+                          el.name === "likes" && el.isActive
+                            ? userCommunication[4]
+                            : el.name === "likes" && !el.isActive
+                            ? userCommunication[0]
+                            : el.name === "dislikes" && el.isActive
+                            ? userCommunication[1]
+                            : el.name === "dislikes" && !el.isActive
+                            ? userCommunication[5]
+                            : el.name === "favorites" && el.isActive
+                            ? userCommunication[2]
+                            : el.name === "favorites" && !el.isActive
+                            ? userCommunication[6]
+                            : userCommunication[3]
                         }
-                        alt="UI.png"
+                        alt={"UI.png"}
+                        className={
+                          el.name === "likes" ||
+                          el.name === "dislikes" ||
+                          el.name === "favorites"
+                            ? ms.scaleUp
+                            : ""
+                        }
                       />
                       <span>{el.amount}</span>
                     </section>
@@ -117,14 +174,14 @@ export const Detail = () => {
                     ms.container__field__content__row1__cardInfo__title
                   }
                 >
-                  {item.title}
+                  {item?.title}
                 </h2>
                 <section
                   className={
                     ms.container__field__content__row1__cardInfo__addInfo
                   }
                 >
-                  {item.characteristics.cardInfo.map((el) => (
+                  {item?.characteristics.map((el) => (
                     <section
                       key={Math.random()}
                       className={
@@ -154,12 +211,12 @@ export const Detail = () => {
                   }
                 >
                   <img src={birka} alt="birka.png" />
-                  <span>${item.price}</span>
+                  <span>${item?.price}</span>
                 </section>
               </section>
             </section>
             <section className={ms.container__field__content__row2}>
-              <Menu item={item} />
+              {<Menu item={item} />}
             </section>
           </section>
         </section>
@@ -183,13 +240,13 @@ const Menu = ({ item }) => {
     },
     {
       isActive: false,
-      text: `Comments (${item.comments.length})`,
-      modal: <CommentsList item ={item}/>,
+      text: `Comments (${item?.comments.length})`,
+      modal: <CommentsList item={item} />,
     },
     {
       isActive: false,
       text: "Price dynamics",
-      modal: <ViewsChart item={item}/>,
+      modal: <ViewsChart item={item} />,
     },
   ]);
 
@@ -223,7 +280,7 @@ const FullInfo = ({ item }) => {
   return (
     <>
       <p className={ms.container__field__content__row2__textInfo}>
-        {item.fullInfo}
+        {item?.full_info}
       </p>
     </>
   );
@@ -238,53 +295,60 @@ const Characteristics = ({ item }) => {
             ms.container__field__content__row2__characteristics__leftMenu
           }
         >
-          {item.characteristics.list.map((item) => (
-            <section
-              key={Math.random()}
-              className={
-                ms.container__field__content__row2__characteristics__leftMenu__row
-              }
-            >
-              <span>{item.name}</span>
-              <span>{item.info}</span>
-            </section>
-          ))}
+          {item.characteristics.map((item, index) => {
+            if (index > 2) {
+              return;
+            }
+            return (
+              <section
+                key={Math.random()}
+                className={
+                  ms.container__field__content__row2__characteristics__leftMenu__row
+                }
+              >
+                <span>{item.name}</span>
+                <span>{item.info}</span>
+              </section>
+            );
+          })}
         </section>
         <section
           className={
             ms.container__field__content__row2__characteristics__rightMenu
           }
         >
-          {item.characteristics.subList.map((item) => (
-            <section
-              key={Math.random()}
-              className={
-                ms.container__field__content__row2__characteristics__leftMenu__row
-              }
-            >
-              <span>{item.name}</span>
-              <span>{item.info}</span>
-            </section>
-          ))}
+          {item.characteristics.map((item, index) => {
+            if (index <= 2) {
+              return;
+            }
+            return (
+              <section
+                key={Math.random()}
+                className={
+                  ms.container__field__content__row2__characteristics__leftMenu__row
+                }
+              >
+                <span>{item.name}</span>
+                <span>{item.info}</span>
+              </section>
+            );
+          })}
         </section>
       </section>
     </>
   );
 };
 
-
-
-const ViewsChart =  ({item}) => {
-
-   const [data,setData] = useState ([
+const ViewsChart = ({ item }) => {
+  const [data, setData] = useState([
     ["Month", "views"],
-    ["January", Math.random() * (100000 -0) + 0],
-    ["February", Math.random() * (100000 -0) + 0],
-    ["March", Math.random() * (100000 -0) + 0],
-    ["Appril", Math.random() * (100000 -0) + 0],
-    ["May", Math.random() * (100000 -0) + 0],
-    ["June", Math.random() * (100000 -0) + 0],
-    ["July", Math.random() * (100000 -0) + 0],
+    ["January", Math.random() * (100000 - 0) + 0],
+    ["February", Math.random() * (100000 - 0) + 0],
+    ["March", Math.random() * (100000 - 0) + 0],
+    ["Appril", Math.random() * (100000 - 0) + 0],
+    ["May", Math.random() * (100000 - 0) + 0],
+    ["June", Math.random() * (100000 - 0) + 0],
+    ["July", Math.random() * (100000 - 0) + 0],
   ]);
 
   const options = {
@@ -293,11 +357,12 @@ const ViewsChart =  ({item}) => {
     legend: { position: "bottom" },
   };
   return (
-      <Chart chartType={"LineChart"}
-        width={"100%"}
-        height={"400px"}
-        data={data}
-        options={options}
-      />
+    <Chart
+      chartType={"LineChart"}
+      width={"100%"}
+      height={"400px"}
+      data={data}
+      options={options}
+    />
   );
-}
+};

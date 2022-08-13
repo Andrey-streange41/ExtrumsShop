@@ -10,6 +10,7 @@ router.post('/registration',UserController.registration);
 router.post('/login',UserController.login);
 router.put('/update',UserController.updateUserById);
 router.get('/:id',UserController.getUserById);
+router.post('/logout',UserController.logout);
 
 
 module.exports = router;

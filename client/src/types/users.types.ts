@@ -1,3 +1,5 @@
+import { IProduct } from "./favoriteList.types";
+
 export interface IUser{
     firstname:string|null;
     lastname:string|null;
@@ -8,6 +10,8 @@ export interface IUser{
     updateAgrements:boolean;
     role?:string;
     id?:string|null;
+    favorites:IProduct[]
 }
+
 
 

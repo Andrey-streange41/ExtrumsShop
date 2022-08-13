@@ -1,4 +1,4 @@
-const { User, UserInfo } = require("../models/models");
+const { User, UserInfo, UserCommunication } = require("../models/models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -47,6 +47,7 @@ class UserService {
   }
   async registration(candidate) {
     try {
+      await UserCommunication.update({isActive:false},{where:{}});
       const { email, password, role, firstname, lastname, telphone, avatar } =
         candidate;
       let user = await User.findOne({
@@ -69,7 +70,8 @@ class UserService {
         lastname,
         telphone,
         avatar,
-        user_id: user.id,
+        userId: user.id,
+        user_id:user.id
       });
 
       if (!userInfo) {
@@ -87,7 +89,8 @@ class UserService {
       );
       return jwt_token;
     } catch (error) {
-      return error.message;
+      console.log(error.message);
+      return error;
     }
   }
   async isAuth(email, id, role, firstname, lastname, telphone, password) {
@@ -114,6 +117,15 @@ class UserService {
       return error;
     }
   }
+
+  async logout(){
+    try {
+      await UserCommunication.update({isActive:false},{where:{}});
+    } catch (error) {
+      return error;
+    }
+  }
+
   async updateUserById(data) {
     try {
       const { id, password, email, avatar } = data;
@@ -159,7 +171,7 @@ class UserService {
       return updatedUser.id;
     } catch (error) {
       console.log(error.message);
-      return error.message;
+      return error;
     }
   }
   async getUserById(id) {
@@ -172,7 +184,7 @@ class UserService {
 
       return { user, userInfo };
     } catch (error) {
-      return error.message;
+      return error;
     }
   }
 }

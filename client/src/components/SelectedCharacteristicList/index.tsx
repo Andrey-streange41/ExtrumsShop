@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { FC } from "react";
+import ms from "./style.module.scss";
 
-
-export const SelectedCharacteristicsList = ({list}) => {
-  return (
-    <ul>
-        {list.map(el=><li>{el.name}={el.info}</li>)}
-    </ul>
-  )
+interface ICharacteristicsListProps {
+  list: string[];
+  removeCharacter: () => {};
 }
+
+export const SelectedCharacteristicsList: FC<ICharacteristicsListProps> = ({
+  list,
+  removeCharacter,
+}) => {
+  return (
+    <ul className={ms.container}>
+      {list.map((el) => (
+        <li key={Math.random()} onClick={() => removeCharacter(el.name)}>
+          <span >{el.name}</span>:
+          <span>{el.info}</span>{" "}
+        </li>
+      ))}
+    </ul>
+  );
+};

@@ -6,6 +6,7 @@ import "./product-images-slider.scss";
 export const ProductImagesSlider = ({images}: IPropTypes) => {
   const [target,setTarget] = useState();
   
+  
   return (
     <>
       <Swiper
@@ -19,7 +20,7 @@ export const ProductImagesSlider = ({images}: IPropTypes) => {
       >
         {images.map((i, index) => (
           <SwiperSlide key={index}>
-            <img  src={i} alt="product images" />
+            <img  src={'http://localhost:5000/' + i} alt="product images" />
           </SwiperSlide>
         ))}
       </Swiper>
@@ -28,13 +29,13 @@ export const ProductImagesSlider = ({images}: IPropTypes) => {
         spaceBetween={10}
         onSwiper={setTarget}
         modules={[Navigation, Thumbs]}
-        slidesPerView={4}
+        slidesPerView={images.length}
         className={"product-images-slider-thumbs"}
       >
         {images.map((i, index) => (
           <SwiperSlide key={index}>
           <section className="product-images-slider-thumbs-wrapper">
-              <img style={{cursor:'grab'}} src={i} alt="product images" />
+              <img style={{cursor:'grab'}} src={'http://localhost:5000/' +i} alt="product images" />
           </section>
            
           </SwiperSlide>

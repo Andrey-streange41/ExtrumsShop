@@ -4,6 +4,8 @@ import ms from "./style.module.scss";
 import { Button } from '../../../components/UI/Button/index.tsx';
 import { setComment } from "../../../app/slices/productsListSlice.ts";
 import { IProduct } from "../../../favoriteList.types";
+import {addCommentToProductThunk} from '../../../app/slices/productsListSlice.ts'
+import { getCommentsThunk } from "../../../app/slices/commentsSlice.ts";
 
 interface IAddCommentsProps {
   item: IProduct
@@ -14,8 +16,8 @@ export const AddComment: FC<IAddCommentsProps> = ({ item }) => {
   const productsList = useSelector(s => s.productsList.productsList);
   const dispatch = useDispatch();
   const [textMessage, setTextMessage] = useState('');
-
-  let prodList = [];
+  
+  
 
   const months = [
     "January",
@@ -37,17 +39,21 @@ export const AddComment: FC<IAddCommentsProps> = ({ item }) => {
   let year = d.getFullYear();
   let hour = d.getHours();
   let min = d.getMinutes();
+  
   useEffect(() => {
+    dispatch(getCommentsThunk(item.id))
+    
 
-
-  }, [productsList]);
+  }, [productsList, item.comments]);
 
 
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const date = { day: day, hour: hour, minute: min, month: month, year: year, second: null }
-    dispatch(setComment({ data: { owner: user.firstname, avatar: user.avatar, date: date, message: textMessage }, id: item.id }))
-    setTextMessage('')
+    dispatch(addCommentToProductThunk({userId:user.id,comment:{textMessage:textMessage,date:date},productId:item.id}));
+    setTextMessage('');
+    dispatch(getCommentsThunk(item.id));
+    
   }
 
   return (

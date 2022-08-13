@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useState } from "react";
+import React, { ChangeEvent, FC, useEffect, useState } from "react";
 import ms from "./style.module.scss";
 import signup from "../../assets/images/signup.png";
 import { Input } from "../UI/Input/Input.tsx";
@@ -32,6 +32,11 @@ export const RegistrationMenu: FC = () => {
     setUser({ ...user, getUpdates: !user.getUpdates });
   };
 
+
+useEffect(()=>{
+  setUser(userStore)
+},[userStore])
+
   const signIn = async () => {
 
     try {
@@ -43,6 +48,8 @@ export const RegistrationMenu: FC = () => {
         role:isActiveAdminMode? "ADMIN" : "USER",
     });
 
+    if(responce ==='error!') return ;
+  
    
     
     if (responce) {

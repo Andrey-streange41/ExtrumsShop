@@ -36,7 +36,7 @@
 
 .container__field__content__row__col {
   width: 46%;
-  border: solid grey 1px;
+  border: solid #766ed3 1px;
   border-radius: 10px;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .container__field__content__row__col__imgArea {
-  border: dashed black 3px;
+  border: dashed #766ed3 3px;
   background-color: whitesmoke;
   cursor: pointer;
   border-radius: 20px;
@@ -60,7 +60,7 @@
 }
 
 .container__field__content__row__col__imgArea:hover {
-  background-color: #d4ebe3;
+  background-color: #d2cdd8;
 }
 
 .container__field__content__row__col__imgArea img {

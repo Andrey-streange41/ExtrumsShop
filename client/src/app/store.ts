@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import  commentsSlice  from './slices/commentsSlice.ts';
 import modalFilterSlice from './slices/modalFilterSlice.ts';
 import  navBarSlice  from './slices/navBarSlice.ts';
 import productsListSlice from './slices/productsListSlice.ts';
@@ -16,7 +17,8 @@ export const store = configureStore({
         modalFilter: modalFilterSlice,
         sort: sortSlice,
         search: searchSlice,
-        user:userSlice
+        user:userSlice,
+        comments:commentsSlice
     },
   })
 

@@ -6,45 +6,18 @@ const path = require("path");
 class ProductController {
   async addProduct(req, res, next) {
     try {
+      const images = req.files;
+      const bufferFormatImages = [];
+        for (let i = 0; i < images.files.length; i++) {
+          const fileName = uuid.v4() +'.'+ images.files[i].name.split('.')[1];
+          images.files[i].mv(path.resolve(__dirname,'..','..','static',fileName));
+          bufferFormatImages.push(fileName);
+        }
+        const data = req.body;
       
-      res.send(200).json({message:'ok'});
-
-      // const { title, images, full_info, category, sub_category, price , characteristics} =
-      //   req.body;
-      // const { avatar } = req.files;
-      // let fileName = uuid.v4() + `.png`;
-      // avatar.mv(path.resolve(__dirname, "..", "..", "static", fileName));
-
-      // if (
-      //   !title ||
-      //   !images ||
-      //   !full_info ||
-      //   !category ||
-      //   !sub_category ||
-      //   !price ||
-      //   !avatar
-      // ) {
-      //   return next(
-      //     ApiError.badRequest(
-      //       "Product info data have invalid format, bad request !"
-      //     )
-      //   );
-      // }
-
-      
-
-      // const product = await ProductService.createProduct({
-      //   characteristics,
-      //   title,
-      //   images,
-      //   full_info,
-      //   category,
-      //   sub_category,
-      //   price,
-      //   avatar: fileName,
-      // });
-
-      // res.status(200).json(product);
+       const product = await ProductService.createProduct({images:bufferFormatImages,data:data});
+        
+      return res.json(product);
     } catch (error) {
       return res.status(500).json(error.message);
     }
@@ -85,6 +58,64 @@ class ProductController {
       return res.status(500).json(error.message);
     }
   }
+  async updateComunicationByProductId(req,res){
+    try {
+     
+      const responce = await ProductService.updateComunicationByProductId({...req.body});
+      return res.status(200).json(responce);
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json(error).message;
+    }
+  }
+
+  async addToFavorite(req,res){
+    try {
+      const results = await ProductService.addToFavorite(req.body);
+      res.status(200).json(results);
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json(error)
+    }
+  }
+
+  async removeFromFavorite(req,res){
+    try {
+      
+      const list = await ProductService.removeFromFavorite(req.body);
+      res.status(200).json(list);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  }
+
+  async getFavorList(req,res){
+    try {
+      console.log(req.params);
+      const results = await ProductService.getFavorList(req.params);
+      res.status(200).json(results);
+    } catch (error) {
+      res.status(500).json(error.message);
+    }
+  }
+  async addComments(req,res){
+    try {
+      const results = await ProductService.addComments(req.body);
+      res.status(200).json(results);
+    } catch (error) {
+      res.status(500).json(error.message);
+    }
+  }
+  async getComments(req,res){
+    try {
+      const results = await ProductService.getComments(req.params);
+      return res.status(200).json(results);
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json(error.message);
+    }
+  }
+ 
 }
 
 module.exports = new ProductController();

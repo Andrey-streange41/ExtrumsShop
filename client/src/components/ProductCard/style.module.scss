@@ -10,10 +10,11 @@
         flex-direction: column;
         align-items: center;
         overflow: auto; 
-       
+         height: 28vh;
+         position: relative;
 
     .container {
-        min-height: 28vh;
+        height: 28vh;
        
         background-color: #ffffff;
         border-radius: 10px;
@@ -53,18 +54,33 @@
             }
 
             &__descr {
-                height: 80%;
+                height: 100%;
                 max-width: 32%;
                 display: flex;
                 justify-content: center;
                 flex-shrink: 1;
                 flex-direction: column;
                 gap: 1em;
+                overflow: auto;
+                margin-bottom: 1em;
 
+                &::-webkit-scrollbar {
+                    background-color: #e6e6e6;
+                    border-radius: 10px; /* округлось бегунка */
+            
+                    width: 8px;
+                }
+                &::-webkit-scrollbar-thumb {
+                    background-color: #d1d1d1; /* цвет бегунка */
+                    border-radius: 10px;
+                    border: 3px solid #d1d1d1;
+                }
+               
                 h2 {
                     font-family: Inter;
                     font-weight: 600;
                     font-size: 1.2em;
+                    margin-top: 3em;
                     color: #171313;
                 }
 
@@ -72,7 +88,8 @@
                     font-family: Inter;
                     font-weight: 600;
                     padding-right: 10px;
-
+                    
+                    
                     
                 }
                 &__section{
@@ -94,6 +111,10 @@
                     display: flex;
                     align-items: center;
                     gap: 1em;
+                    position: absolute;
+                    bottom: 0;
+                    left: 150px;
+                    margin-bottom: 1em;
 
                     @media screen and(max-width:870px) {
                         &{

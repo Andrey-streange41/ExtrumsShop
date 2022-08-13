@@ -99,9 +99,6 @@ export const Admin: FC = () => {
   ]);
   const user = useSelector(s=>s.user.userData);
   const isAuth = useSelector(s=>s.user.isAuth);
-  const addProduct = () => {
-
-  }
 
   return (
 
@@ -139,7 +136,7 @@ export const Admin: FC = () => {
             <section className={ms.container__field__content__col2}>
               <h2>Sales Revenue</h2>
               <ul  className={ms.container__field__content__col2__list}>
-                  {revenueList.map(el=><li className={ms.container__field__content__col2__list__item}> 
+                  {revenueList.map(el=><li key={Math.random()} className={ms.container__field__content__col2__list__item}> 
                     <section className={ms.container__field__content__col2__list__item__round}>
                       <img src={el.img} alt="" />
                     </section>

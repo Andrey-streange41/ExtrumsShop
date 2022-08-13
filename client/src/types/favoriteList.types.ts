@@ -30,10 +30,10 @@ export interface ICharacteristics {
 
 export interface IUserInterfaceItem{
   amount:number,
-  img:string,
   name:string,
-  img2:string,
-  isActive:boolean
+  isActive:boolean,
+  id:number,
+  productId:number
 }
 
 export interface IPurpose{
@@ -42,21 +42,26 @@ export interface IPurpose{
 }
 
 export interface IProduct {
-  characteristics: ICharacteristics
-  fullInfo:string,
-  productImages:string[];
-  id:string;
-  isFavor:boolean,
-  priceDynamic: {};
-  comments: IComment[];
+  avatar: string,
   category: string,
-  subCategory: string,
-  img: string,
-  title: string,
-  design:string,
-  price: number,
   discount:boolean,
-  userComunication:IUserInterfaceItem[],
-  purpose:IPurpose[]
+  favorites?:IFavorites,
+  full_info:string,
+  id:number,
+  images:string[],
+  isFavor:boolean,
+  price:number,
+  characteristics:ICharacteristics,
+  subCategory: string,
+  title: string,
+  comments?: IComment[];
+  userComunications?:IUserInterfaceItem[],
+  purpose?:IPurpose[]
+}
 
+
+export interface IFavorites{
+  id:number;
+  userId:number;
+  productId:number;
 }

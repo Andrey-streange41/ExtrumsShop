@@ -7,10 +7,7 @@ import ms from './style.module.scss';
 export const FavoriteList = () => {
     const favList = useSelector(s=>s.productsList.favoriteList);
     const mode = useSelector(s=>s.toolsPanel.isActiveViewMode);
-    useEffect(() => {
-      
-         
-    },[])
+   
 
   return (
     <>

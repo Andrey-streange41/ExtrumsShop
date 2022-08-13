@@ -34,7 +34,7 @@
 
                 &__col{
                     width: 46%;
-                    border:solid grey 1px;
+                    border:solid #766ed3 1px;
                     border-radius:10px;
                   
 
@@ -43,7 +43,7 @@
                     }
 
                     &__imgArea{
-                        border: dashed rgb(0, 0, 0) 3px;
+                        border: dashed #766ed3 3px;
                         background-color: whitesmoke;
                         cursor: pointer;
                         border-radius: 20px;
@@ -58,7 +58,7 @@
                         justify-content: center;
 
                         &:hover{
-                            background-color: rgb(212, 235, 227);
+                            background-color: rgb(210, 205, 216);
                         }
                         img{
                             width: 35%;

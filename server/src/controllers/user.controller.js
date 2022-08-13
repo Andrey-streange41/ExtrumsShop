@@ -23,7 +23,16 @@ class UserController {
       });
       return res.status(200).json(jwt_token);
     } catch (error) {
-      res.status(500).json(error.message);
+      res.status(500).json(error);
+    }
+  }
+
+  async logout(req,res){
+    try {
+      await UserService.logout();
+      res.status(200);
+    } catch (error) {
+      res.status(500).json(error)
     }
   }
 
@@ -61,6 +70,7 @@ class UserController {
       );
       return res.status(200).json(token);
     } catch (error) {
+      console.log(error.message);
       res.status(500).json(error.message);
     }
   }

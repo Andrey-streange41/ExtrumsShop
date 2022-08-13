@@ -118,10 +118,10 @@ export const modalItems: IModalItems[] = [
     ],
   },
   {
-    title: "Auto",
+    title: "Cars",
     items: [
       { category: "BMW", isActive: false },
-      { category: "Mersedes", isActive: false },
+      { category: "Mercedes", isActive: false },
       { category: "Audi", isActive: false },
       { category: "Toyota", isActive: false },
     ],
@@ -298,7 +298,7 @@ export const tmpProductList: IProduct[] = [
 
     discount: false,
 
-    userComunication: [
+    userComunications: [
       {
         amount: 930,
         img: String(userCommunication[3]),
@@ -391,7 +391,7 @@ export const tmpProductList: IProduct[] = [
       "Dijagonala monitora u incima 17.3,Rezolucija monitora HD+ 1600x900",
     price: 1228,
     discount: false,
-    userComunication: [
+    userComunications: [
       {
         amount: 10,
         img: String(userCommunication[3]),
@@ -486,7 +486,7 @@ export const tmpProductList: IProduct[] = [
       "Several qualities of the Samsung Galaxy A52 screen are clearly visible from the first seconds",
     price: 500,
     discount: false,
-    userComunication: [
+    userComunications: [
       {
         amount: 630,
         img: String(userCommunication[3]),
@@ -594,7 +594,7 @@ export const tmpProductList: IProduct[] = [
     price: 22500,
     discount: false,
 
-    userComunication: [
+    userComunications: [
       {
         amount: 230,
         img: String(userCommunication[3]),
@@ -688,7 +688,7 @@ export const tmpProductList: IProduct[] = [
     price: 100,
     discount: false,
 
-    userComunication: [
+    userComunications: [
       {
         amount: 130,
         img: String(userCommunication[3]),

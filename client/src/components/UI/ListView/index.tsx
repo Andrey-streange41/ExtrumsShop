@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import ms from './style.module.scss';
 
+interface IListViewProps{
+  list:string[],
+  onClick:()=>{},
+  selectedItem:string;
+  label:string
+}
 
-
-export const ListView = ({ list,onClick,selectedItem }) => {
+export const ListView:FC<IListViewProps> = ({ list,onClick,selectedItem,label }) => {
   const [isOpen, setOpen] = useState(false);
   
  
   
   return (
     <div className={ms.container}>
-      <label className={ms.container__myLabel} htmlFor="input">Category</label>
+      <label className={ms.container__myLabel} htmlFor="input">{label}</label>
       <section id={'input'} className={ms.container__myInput}>
         <span>{selectedItem}</span>
         <img src={isOpen ?

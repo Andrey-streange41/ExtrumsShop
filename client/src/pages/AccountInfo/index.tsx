@@ -12,7 +12,8 @@ import jwt_decode from 'jwt-decode';
 import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setAuth } from "../../app/slices/userSlice.ts";
+import { setAuth,logoutThunk } from "../../app/slices/userSlice.ts";
+
 
 let schema = yup.object().shape({
   firstname: yup.string().max(20),
@@ -209,6 +210,7 @@ export const AccountInfo: FC = () => {
     dispatch(setUserData({}));
     localStorage.removeItem('token');
     nav('/');
+    dispatch(logoutThunk());
   }
 
   return (

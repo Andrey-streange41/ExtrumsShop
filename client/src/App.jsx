@@ -10,52 +10,67 @@ import { Registration } from "./pages/Authorization/Registration.tsx";
 import { Login } from "./pages/Authorization/Login.tsx";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {isAuth} from './http/userAPI.ts';
-import {setAuth,setUserData} from './app/slices/userSlice.ts';
-import jwt_decode from 'jwt-decode';
-import {getUserById} from './http/userAPI.ts';
+import { isAuth } from "./http/userAPI.ts";
+import { setAuth, setUserData } from "./app/slices/userSlice.ts";
+import jwt_decode from "jwt-decode";
+import { getUserById } from "./http/userAPI.ts";
 import { getUserByIdChunck } from "./app/slices/userSlice.ts";
 import { Admin } from "./pages/Admin/index.tsx";
 import { AddProduct } from "./pages/AddProduct/index.tsx";
+import {
+  getProductsThunk,
+} from "./app/slices/productsListSlice.ts";
+
+import { getFavorListThunk } from "./app/slices/productsListSlice.ts";
 
 function App() {
-  
   const dispatch = useDispatch();
-  const [loading,setLoading] = useState(true);
- useEffect(()=>{
+  const [loading, setLoading] = useState(true);
+  const favorList = useSelector(s=>s.productsList.favoriteList);
+  const user = useSelector(s=>s.user)
+  const isAuthuser = useSelector(s=>s.user.isAuth)
+
+  useEffect(() => {
+ 
     isAuth().then(() => {
       dispatch(setAuth(true));
     }).finally(()=>{
-      setLoading(false);
+      setLoading(false); 
     });
   
       if(localStorage.getItem('token'))
       {
         dispatch(getUserByIdChunck(jwt_decode(localStorage.getItem('token')).id));
       }
- },[]);
+     dispatch(getProductsThunk());
+   
+  }, [loading]);
 
+  
 
-
-if(loading){
-  return <section>Loading...</section>
-}
+  if (loading) {
+    return <section>Loading...</section>;
+  }
 
   return (
     <div className="App">
       <Routes>
         <Route exact path="/catalog/:category/:id" element={<Detail />} />
-        <Route exact path="/:page/:category/subcategory/:subcategory" element={<Catalog/>}/>
+        <Route
+          exact
+          path="/:page/:category/subcategory/:subcategory"
+          element={<Catalog />}
+        />
         <Route exact path="/favorites/:category/:id" element={<Detail />} />
         <Route exact path="/catalog/:category" element={<Catalog />} />
         <Route exact path="/catalog" element={<Catalog />} />
         <Route exact path="/favorites/:category" element={<Favorite />} />
         <Route exact path="/favorites" element={<Favorite />} />
-        <Route exact path="/account" element={<AccountInfo/>}/>
-        <Route exact path="/login" element={<Login/>}/>
-        <Route exact path="/registration" element={<Registration/>}/>
-        <Route exact path='/admin' element={<Admin/>}/>
-        <Route exact path="/admin/addProduct" element={<AddProduct/>}/>
+        <Route exact path="/account" element={<AccountInfo />} />
+        <Route exact path="/login" element={<Login />} />
+        <Route exact path="/registration" element={<Registration />} />
+        <Route exact path="/admin" element={<Admin />} />
+        <Route exact path="/admin/addProduct" element={<AddProduct />} />
         <Route exact path="/" element={<Home />} />
       </Routes>
     </div>

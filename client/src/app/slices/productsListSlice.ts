@@ -1,103 +1,129 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { IProduct } from "../../types/favoriteList.types";
+import {
+  createSlice,
+  createAsyncThunk,
+  SerializedError,
+} from "@reduxjs/toolkit";
+import { IComment, IProduct } from "../../types/favoriteList.types";
 import { tmpProductList } from "../../localDB/index.ts";
+import {
+  addComment,
+  getProducts,
+  updateProductById,
+  addToFavorites,
+  updateComunicationByProductId,
+  removeFromFavorites,
+  getFavoriteList,
+} from "../../http/productApi.ts";
+import { AxiosError } from "axios";
 
 export interface IProductsList {
   favoriteList: IProduct[];
   productsList: IProduct[];
   filteredList: IProduct[];
   favorFilterList: IProduct[];
+  loading: "idle" | "pending" | "succeeded" | "failed";
+  currentRequestId: string | undefined;
+  error: SerializedError | null;
+  testList?: any[];
+  comments?:IComment[];
 }
 
 const initialState: IProductsList = {
-  favoriteList: localStorage.getItem("favorList")
-    ? JSON.parse(localStorage.getItem("favorList"))
-    : [],
+  favoriteList: [],
   productsList: tmpProductList,
   filteredList: [],
-  favorFilterList:[]
+  favorFilterList: [],
+  loading: "idle",
+  currentRequestId: undefined,
+  error: null,
+  testList: [],
+  comments:[]
 };
+
+export const getProductsThunk = createAsyncThunk(
+  "get/product",
+  async function (_, { rejectWithValue }) {
+    try {
+      const products = await getProducts();
+      return products;
+    } catch (error) {
+      rejectWithValue(error);
+    }
+  }
+);
+
+export const updateProductsThunk = createAsyncThunk(
+  "update/product",
+  async function (data, { rejectWithValue }) {
+    try {
+      const products = await updateComunicationByProductId(data);
+      if(products instanceof AxiosError){
+        throw new Error('Reques faild !')
+      }
+      return products;
+    } catch (error) {
+      rejectWithValue(error);
+      return error;
+    }
+  }
+);
+
+export const addToFavoritesThunk = createAsyncThunk(
+  "add/favorites",
+  async function (data, { rejectWithValue }) {
+    try {
+      const products = await addToFavorites(data);
+      return products;
+    } catch (error) {
+      console.log(error.message);
+      rejectWithValue(error);
+    }
+  }
+);
+
+export const removeFromFavoriteListThunk = createAsyncThunk(
+  "remove/favorites",
+  async function (data, { rejectWithValue }) {
+    try {
+      const responce = await removeFromFavorites(data);
+      return responce;
+    } catch (error) {
+      console.log(error.message);
+      rejectWithValue(error);
+    }
+  }
+);
+
+export const getFavorListThunk = createAsyncThunk(
+  "remove/favorites",
+  async function (userId, { rejectWithValue }) {
+    try {
+      const responce = await getFavoriteList(userId);
+      return responce;
+    } catch (error) {
+      console.log(error.message);
+      rejectWithValue(error);
+    }
+  }
+);
+
+export const addCommentToProductThunk = createAsyncThunk(
+  "add/comment",
+  async function (data, { rejectWithValue }) {
+    try {
+      const responce = await addComment(data);
+      return responce;
+    } catch (error) {
+      console.log(error.message);
+      rejectWithValue(error);
+    }
+  }
+);
 
 const productsListSlice = createSlice({
   name: "productsList",
   initialState,
   reducers: {
-    addToFavorite: (state, action) => {
-      state.favoriteList = [
-        ...state.favoriteList,
-        { ...action.payload, isFavor: true },
-      ];
-      const defaulListEl = state.productsList
-        .find((el) => el.id === action.payload.id)
-        ?.userComunication.find((el) => el.name === "favorite");
-      if (defaulListEl) {
-        defaulListEl.isActive = true;
-        ++defaulListEl.amount;
-      }
-      const filterListEl = state.filteredList
-        .find((el) => el.id === action.payload.id)
-        ?.userComunication.find((el) => el.name === "favorite");
-      if (filterListEl) {
-        filterListEl.isActive = true;
-        ++filterListEl.amount;
-      }
-      const filterFavorListEl = state.favorFilterList
-        .find((el) => el.id === action.payload.id)
-        ?.userComunication.find((el) => el.name === "favorite");
-      if (filterFavorListEl) {
-          filterFavorListEl.isActive = true;
-        ++filterFavorListEl.amount;
-      }
-    },
-    removeFromFavoriteList: (state, action) => {
-      state.favoriteList = state.favoriteList.filter(
-        (i) => i.title !== action.payload.title
-      );
-      state.favorFilterList = state.favorFilterList.filter(
-        (i) => i.title !== action.payload.title
-      );
-
-      const prodList = state.productsList.find(
-        (el) => el.id === action.payload.id
-      );
-      const prodFavor = prodList?.userComunication?.find(
-        (el) => el.name === "favorite"
-      );
-      if (prodFavor) {
-        prodFavor.isActive = false;
-        --prodFavor.amount;
-      }
-      const favorList = state.favoriteList.find(
-        (el) => el.id === action.payload.id
-      );
-      const favorFavor = favorList?.userComunication?.find(
-        (el) => el.name === "favorite"
-      );
-      if (favorFavor) {
-        favorFavor.isActive = false;
-        --favorFavor.amount;
-      }
-      const filterList = state.filteredList.find(
-        (el) => el.id === action.payload.id
-      );
-      const filtFavor = filterList?.userComunication?.find(
-        (el) => el.name === "favorite"
-      );
-      if (filtFavor) {
-        filtFavor.isActive = false;
-        --filtFavor.amount;
-      }
-      const filterFavorL = state.favorFilterList.find(
-        (el) => el.id === action.payload.id
-      );
-      const filtFavCom = filterFavorL?.userComunication?.find(
-        (el) => el.name === "favorite"
-      );
-      if (filtFavCom) {
-        filtFavCom.isActive = false;
-        --filtFavCom.amount;
-      }
-    },
     setFilteredList: (state, action) => {
       state.filteredList = [...action.payload];
     },
@@ -107,217 +133,149 @@ const productsListSlice = createSlice({
     setFavoriteList: (state, action) => {
       state.favoriteList = [...action.payload];
     },
-    setFavorFilterList:(state,action)=>{
+    setFavorFilterList: (state, action) => {
       state.favorFilterList = action.payload;
     },
-    likeCliked: (state, action) => {
-      const element = state.productsList.find((el) => el.id === action.payload);
-      const filteredListElement = state.filteredList.find(
-        (el) => el.id === action.payload
-      );
-      const filteredListLikeCom = filteredListElement?.userComunication.find(
-        (el) => el.name === "like"
-      );
-      const filtListDislikeCom = filteredListElement?.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-      const elementLikeCommunication = element.userComunication.find(
-        (el) => el.name === "like"
-      );
-      const elementDislikeCom = element.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-      const favoriteListElement = state.favoriteList.find(
-        (el) => el.id === action.payload
-      );
-      const favorElementUserCom = favoriteListElement?.userComunication.find(
-        (el) => el.name === "like"
-      );
-      const favorElDislikeCom = favoriteListElement?.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-
-      const favorFilterEl = state.favorFilterList.find(
-        (el) => el.id === action.payload
-      );
-      const favorFilterElComLike = favorFilterEl?.userComunication.find(
-        (el) => el.name === "like"
-      );
-      const favorFilterElComDislike = favorFilterEl?.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-
-      if (!elementLikeCommunication.isActive) {
-        if (elementLikeCommunication.amount) {
-          ++elementLikeCommunication.amount;
-          elementLikeCommunication.isActive = true;
-        }
-        if (elementDislikeCom.isActive && elementDislikeCom.amount) {
-          elementDislikeCom.isActive = false;
-          --elementDislikeCom.amount;
-        }
-        if (filteredListLikeCom && filteredListLikeCom.amount) {
-          ++filteredListLikeCom.amount;
-          filteredListLikeCom.isActive = true;
-
-          if (filtListDislikeCom.isActive && filtListDislikeCom.amount) {
-            --filtListDislikeCom.amount;
-            filtListDislikeCom.isActive = false;
-          }
-        }
-        if (favorElementUserCom && favorElementUserCom.amount) {
-          if (favorElDislikeCom.isActive) {
-            favorElDislikeCom.isActive = false;
-            --favorElDislikeCom.amount;
-          }
-          ++favorElementUserCom.amount;
-          favorElementUserCom.isActive = true;
-        }
-        if (favorFilterElComLike && favorFilterElComLike.amount) {
-          if (favorFilterElComDislike.isActive) {
-            favorFilterElComDislike.isActive = false;
-            --favorFilterElComDislike.amount;
-          }
-          ++favorFilterElComLike.amount;
-          favorFilterElComLike.isActive = true;
-        }
-      } else {
-        if (filteredListLikeCom && filteredListLikeCom.amount) {
-          --filteredListLikeCom.amount;
-          filteredListLikeCom.isActive = false;
-        }
-        if (favorElementUserCom && favorElementUserCom.amount) {
-          --favorElementUserCom.amount;
-          favorElementUserCom.isActive = false;
-        }
-        if (elementLikeCommunication && elementLikeCommunication.amount) {
-          --elementLikeCommunication.amount;
-          elementLikeCommunication.isActive = false;
-        }
-        if (favorFilterElComLike && favorFilterElComLike.amount) {
-          --favorFilterElComLike.amount;
-          favorFilterElComLike.isActive = false;
-        }
+  },
+  extraReducers: {
+    [String(getProductsThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
       }
     },
-    dislikeCliked: (state, action) => {
-      const element = state.productsList.find((el) => el.id === action.payload);
-      const elementDislikeCommunication = element.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-      const elementLikeCom = element.userComunication.find(
-        (el) => el.name === "like"
-      );
-
-      const filteredListElement = state.filteredList.find(
-        (el) => el.id === action.payload
-      );
-      const filteredListDislikeCom = filteredListElement?.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-      const filtListLikeCom = filteredListElement?.userComunication.find(
-        (el) => el.name === "like"
-      );
-
-      const favoriteListElement = state.favoriteList.find(
-        (el) => el.id === action.payload
-      );
-      const favorElDislikeCom = favoriteListElement?.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-      const favorElLikekeCom = favoriteListElement?.userComunication.find(
-        (el) => el.name === "like"
-      );
-
-      const favoriteFilterListElement = state.favorFilterList.find(
-        (el) => el.id === action.payload
-      );
-      const favorFilterElDislikeCom = favoriteFilterListElement?.userComunication.find(
-        (el) => el.name === "dislike"
-      );
-      const favorFilterElLikekeCom = favoriteFilterListElement?.userComunication.find(
-        (el) => el.name === "like"
-      );
-
-      if (!elementDislikeCommunication.isActive) {
-        if (elementDislikeCommunication) {
-          ++elementDislikeCommunication.amount;
-          elementDislikeCommunication.isActive = true;
-
-          if (elementLikeCom && elementLikeCom.isActive) {
-            elementLikeCom.isActive = false;
-            --elementLikeCom.amount;
-          }
-        }
-
-        if (filteredListDislikeCom) {
-          ++filteredListDislikeCom.amount;
-          filteredListDislikeCom.isActive = true;
-
-          if (filtListLikeCom && filtListLikeCom.isActive) {
-            --filtListLikeCom.amount;
-            filtListLikeCom.isActive = false;
-          }
-        }
-
-        if (favorElDislikeCom) {
-          if (favorElLikekeCom && favorElLikekeCom.isActive) {
-            favorElLikekeCom.isActive = false;
-            --favorElLikekeCom.amount;
-          }
-          ++favorElDislikeCom.amount;
-          favorElDislikeCom.isActive = true;
-        }
-        if (favorFilterElDislikeCom) {
-          if (favorFilterElLikekeCom && favorFilterElLikekeCom.isActive) {
-            favorFilterElLikekeCom.isActive = false;
-            --favorFilterElLikekeCom.amount;
-          }
-          ++favorFilterElDislikeCom.amount;
-          favorFilterElDislikeCom.isActive = true;
-        }
-      } else {
-        if (elementDislikeCommunication) {
-          --elementDislikeCommunication.amount;
-          elementDislikeCommunication.isActive = false;
-        }
-        if (filteredListDislikeCom) {
-          --filteredListDislikeCom.amount;
-          filteredListDislikeCom.isActive = false;
-        }
-        if (favorElDislikeCom) {
-          --favorElDislikeCom.amount;
-          favorElDislikeCom.isActive = false;
-        }
-        if (favorFilterElDislikeCom) {
-          --favorFilterElDislikeCom.amount;
-          favorFilterElDislikeCom.isActive = false;
-        }
+    [String(getProductsThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
       }
     },
-    viewsUp: (state, action) => {
-      const productsListElement = state.productsList.find(
-        (el) => el.id === action.payload
-      );
-      if(productsListElement)
-        ++productsListElement.userComunication.find((el) => el.name === "views")
-          .amount;
-      const filteredListElement = state.filteredList.find(
-        (el) => el.id === action.payload
-      );
-      if(filteredListElement)
-        ++filteredListElement.userComunication.find((el) => el.name === "views")
-          .amount;
-      const favorListElement = state.favoriteList.find(
-        (el) => el.id === action.payload
-      );
-      if(favorListElement)
-        ++favorListElement.userComunication.find((el) => el.name === "views")
-          .amount;
+    [String(getProductsThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
     },
-    setComment:(state,action)=>{
-      state.productsList.find(el=>el.id===action.payload.id).comments = [...state.productsList.find(el=>el.id===action.payload.id).comments,action.payload.data]
-    }
+
+    [String(updateProductsThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(updateProductsThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        const coms = action.payload.filter(el=>el.userComunications.find(el=>el.name ==='favorites').isActive);
+        state.favoriteList = coms;
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(updateProductsThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(addToFavoritesThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(addToFavoritesThunk.fulfilled)]: (state, action) => {
+      if (state.loading === "pending") {
+        state.loading = "idle";
+        state.favoriteList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(addToFavoritesThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(removeFromFavoriteListThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(removeFromFavoriteListThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.favoriteList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(removeFromFavoriteListThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(getFavorListThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(getFavorListThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+
+        state.favoriteList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(getFavorListThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
+    },
+
+
+    [String( addCommentToProductThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String( addCommentToProductThunk.fulfilled)]: (state, action) => {
+      
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.comments = action.payload.comments;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
+    },
+    [String( addCommentToProductThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "idle";
+        state.currentRequestId = undefined;
+      }
+    },
   },
 });
 
@@ -331,7 +289,7 @@ export const {
   setProductsList,
   setFavoriteList,
   setFavorFilterList,
-  setComment
+  setComment,
 } = productsListSlice.actions;
 
 export default productsListSlice.reducer;

@@ -10,7 +10,7 @@ interface ISelectedImagesListProps {
 export const SelectedImagesList: FC<ISelectedImagesListProps> = ({ images,removeItem }) => {
     return (
         <ul className={ms_list.list}>
-            {images.map(el => <ListItem removeItem={removeItem} img={el} />)}
+            {images.map(el => <ListItem key={Math.random()} removeItem={removeItem} img={el} />)}
         </ul>
     )
 }
@@ -22,7 +22,7 @@ interface IListItemProps {
 
 
 const ListItem: FC<IListItemProps> = ({ img,removeItem }) => {
-    console.log(window.URL.createObjectURL(img));
+    
 
     return (
         <li className={ms_item.item}>

@@ -5,8 +5,8 @@ import {
 } from "@reduxjs/toolkit";
 import { IUser } from "../../types/users.types";
 import avatar from "../../assets/images/Avatar.png";
-import { updateUserById, getUserById } from "../../http/userAPI.ts";
-import jwt_decode from "jwt-decode";
+import { updateUserById, getUserById , logout} from "../../http/userAPI.ts";
+
 
 interface IUserState {
   userData: IUser;
@@ -17,13 +17,7 @@ interface IUserState {
   error: SerializedError | null;
 }
 
-interface IStoreData {
-  firstname?: string;
-  lastname?: string;
-  email?: string;
-  tel?: string;
-  id?: string;
-}
+
 
 const initialState: IUserState = {
   userData: {
@@ -35,6 +29,7 @@ const initialState: IUserState = {
     avatar: avatar,
     updateAgrements: false,
     id: null,
+    favorites:[]
   },
   
   isAuth: false,
@@ -50,6 +45,18 @@ export const updateUser = createAsyncThunk(
     try {
       const data = await updateUserById(userData);
       return data;
+    } catch (err) {
+      console.log(err.message);
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const logoutThunk = createAsyncThunk(
+  "users/logout",
+  async function ( _, { rejectWithValue }) {
+    try {
+       await logout();
     } catch (err) {
       console.log(err.message);
       return rejectWithValue(err.message);
@@ -120,6 +127,7 @@ const userSlice = createSlice({
         state.loading = "idle";
         state.userData = {
           ...state.userData,
+          id:action.payload.user.id,
           email: action.payload.user.email,
           tel: action.payload.userInfo.telphone,
           firstname:action.payload.userInfo.firstname,
@@ -131,6 +139,29 @@ const userSlice = createSlice({
       }
     },
     [String(getUserByIdChunck.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && state.currentRequestId === requestId) {
+        state.loading = "idle";
+        state.error = action.error;
+        state.currentRequestId = undefined;
+      }
+    },
+
+    [String(logoutThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(logoutThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && state.currentRequestId === requestId) {
+        state.loading = "idle";
+        state.isAuth = false;
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(logoutThunk.rejected)]: (state, action) => {
       const { requestId } = action.meta;
       if (state.loading === "pending" && state.currentRequestId === requestId) {
         state.loading = "idle";

@@ -9,7 +9,7 @@ interface IButtonProps{
 
 export const Button:FC<IButtonProps> = ({text,handleSubmit,width}) => {
   return (
-    <div className={ms.container} onClick={handleSubmit} style={{width:width}}>
+    <div className={ms.container} onClick={handleSubmit} style={{minWidth:width}}>
         {text}
     </div>
   )
@@ -19,7 +19,7 @@ export const Button:FC<IButtonProps> = ({text,handleSubmit,width}) => {
 export const OutlineButton:FC<IButtonProps> = ({text,handleSubmit,width}) => {
   
   return (
-    <div className={ms.container2} onClick={handleSubmit} style={{width:width}}>
+    <div className={ms.container2} onClick={handleSubmit} style={{minWidth:width}}>
         {text}
     </div>
   )
