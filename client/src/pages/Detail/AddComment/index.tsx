@@ -13,11 +13,13 @@ interface IAddCommentsProps {
 
 export const AddComment: FC<IAddCommentsProps> = ({ item }) => {
   const user = useSelector((s) => s.user.userData);
-  const productsList = useSelector(s => s.productsList.productsList);
   const dispatch = useDispatch();
   const [textMessage, setTextMessage] = useState('');
   
-  
+  useEffect(()=>{
+    console.log('Add comment mount');
+    
+  },[])
 
   const months = [
     "January",
@@ -40,20 +42,13 @@ export const AddComment: FC<IAddCommentsProps> = ({ item }) => {
   let hour = d.getHours();
   let min = d.getMinutes();
   
-  useEffect(() => {
-    dispatch(getCommentsThunk(item.id))
-    
-
-  }, [productsList, item.comments]);
-
-
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const date = { day: day, hour: hour, minute: min, month: month, year: year, second: null }
-    dispatch(addCommentToProductThunk({userId:user.id,comment:{textMessage:textMessage,date:date},productId:item.id}));
-    setTextMessage('');
-    dispatch(getCommentsThunk(item.id));
-    
+     const date = { day: day, hour: hour, minute: min, month: month, year: year, second: null }
+     dispatch(addCommentToProductThunk({userId:user.id,comment:{textMessage:textMessage,date:date},productId:item.id}))
+    .then(()=>dispatch(getCommentsThunk(item.id)));
+     setTextMessage('');
+
   }
 
   return (

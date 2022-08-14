@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import ms from "./style.module.scss";
-import star from "../../assets/images/star.png";
 import birka from "../../assets/images/birka.png";
-import favorite2 from "../../assets/images/favorite2.png";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
- 
-  viewsUp,
-} from "../../app/slices/productsListSlice.ts";
 import { IProduct, IUserInterfaceItem } from "../../types/favoriteList.types";
 import { userCommunication } from "../../assets/images/index.js";
-import { updateProductsThunk,addToFavoritesThunk,removeFromFavoriteListThunk} from '../../app/slices/productsListSlice.ts';
+import {
+  updateProductsThunk,
+  addToFavoritesThunk,
+  removeFromFavoriteListThunk,
+} from "../../app/slices/productsListSlice.ts";
 
-export const ProductCard_v2 = ({ item }: IProduct) => {
+interface ICardProps {
+  item: IProduct;
+}
+
+export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
   const dispatch = useDispatch();
   const list = useSelector((s) => s.productsList.favoriteList);
   const nav = useNavigate();
@@ -28,15 +30,11 @@ export const ProductCard_v2 = ({ item }: IProduct) => {
   const isAuth = useSelector((s) => s.user.isAuth);
   const [coms, setComs] = useState<IUserInterfaceItem[]>([]);
   const user = useSelector((s) => s.user.userData);
-  const loading = useSelector(s=>s.productsList.loading);
+  const loading = useSelector((s) => s.productsList.loading);
 
   const handleFavoriteClick = () => {
-   
-    
     if (!isAuth) {
-      alert(
-        "You must sign in to you account for this option !"
-      );
+      alert("You must sign in to you account for this option !");
       return;
     }
     dispatch(
@@ -44,19 +42,26 @@ export const ProductCard_v2 = ({ item }: IProduct) => {
         name: "favorites",
         id: item.id,
       })
-    ).then((data)=>{
-      const favoriteState = data.payload.find(el=>el.id===item.id).userComunications.find(el=>el.name==='favorites').isActive;
-      if(favoriteState === true){
-         dispatch(addToFavoritesThunk({productId:item.id,userId:user.id})); 
-      }
-      else{
-        dispatch(removeFromFavoriteListThunk({productId:item.id,userId:user.id}));
-      } 
-    }).catch((err)=>{
-      console.log(err.message);
-    })
+    )
+      .then((data) => {
+        const favoriteState = data.payload
+          .find((el) => el.id === item.id)
+          .userComunications.find((el) => el.name === "favorites").isActive;
+        if (favoriteState === true) {
+          dispatch(
+            addToFavoritesThunk({ productId: item.id, userId: user.id })
+          );
+        } else {
+          dispatch(
+            removeFromFavoriteListThunk({ productId: item.id, userId: user.id })
+          );
+        }
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
   };
-  
+
   useEffect(() => {
     setComs(
       [...item?.userComunications]?.sort(
@@ -64,12 +69,8 @@ export const ProductCard_v2 = ({ item }: IProduct) => {
           String(a.name).localeCompare(b.name)
       )
     );
-       
-        
-  }, [item,user.id,loading]);
+  }, [item, user.id, loading]);
 
-
- 
   return (
     <section className={ms.container}>
       <section className={ms.container__favorite}>
@@ -97,21 +98,21 @@ export const ProductCard_v2 = ({ item }: IProduct) => {
         }}
         className={ms.container__wrapper}
       >
-       <Link
-            to={"/" + link}
-            style={{ textDecoration: "none", color: "black" }}
-          >
-            <img
-              onClick={() => {
-                dispatch(updateProductsThunk({ name: "views", id: item.id }));
-              }}
-              src={
-                "http://localhost:5000/" +
-                String(item?.avatar).replace('"', "").replace('"', "")
-              }
-              alt="headphones.png"
-            />{" "}
-          </Link>
+        <Link
+          to={"/" + link}
+          style={{ textDecoration: "none", color: "black" }}
+        >
+          <img
+            onClick={() => {
+              dispatch(updateProductsThunk({ name: "views", id: item.id }));
+            }}
+            src={
+              "http://localhost:5000/" +
+              String(item?.avatar).replace('"', "").replace('"', "")
+            }
+            alt="headphones.png"
+          />{" "}
+        </Link>
       </section>
 
       <section className={ms.container__UI}>
@@ -132,30 +133,28 @@ export const ProductCard_v2 = ({ item }: IProduct) => {
                       );
                     }
                   : el.name === "dislikes"
-                  ? () =>
-                      {
-                        if (!isAuth) {
-                          alert(
-                            "You must sign in to you account for this option !"
-                          );
-                          return;
-                        }
-                        dispatch(
+                  ? () => {
+                      if (!isAuth) {
+                        alert(
+                          "You must sign in to you account for this option !"
+                        );
+                        return;
+                      }
+                      dispatch(
                         updateProductsThunk({
                           name: "dislikes",
                           id: item.id,
                         })
-                      )}
+                      );
+                    }
                   : el.name === "favorites"
                   ? handleFavoriteClick
-                  : () => {
-                    
-                  }
+                  : () => {}
               }
               src={
                 el.name === "likes" && el.isActive
                   ? userCommunication[4]
-                  : el.name === "likes" && !el.isActive 
+                  : el.name === "likes" && !el.isActive
                   ? userCommunication[0]
                   : el.name === "dislikes" && el.isActive
                   ? userCommunication[1]

@@ -1,3 +1,4 @@
+import {IUser} from './users.types.ts'
 export interface IDate {
   month: string;
   year: number;
@@ -8,10 +9,15 @@ export interface IDate {
 }
 
 export interface IComment {
-  owner: string;
-  avatar: string;
-  message: string;
-  date: IDate;
+  createdAt?:string;
+  date?:IDate;
+  dateId:number;
+  id:number;
+  message:string;
+  productId:number;
+  updatedAt?:string;
+  userId:number;
+  user?:IUser;
 }
 
 
@@ -23,9 +29,10 @@ export interface ICharct{
 
 
 export interface ICharacteristics {
-  list:ICharct[],
-  subList:ICharct[],
-  cardInfo:ICharct[],
+ id:number;
+ productId:number;
+ info:string;
+  name:string;
 }
 
 export interface IUserInterfaceItem{
@@ -37,6 +44,10 @@ export interface IUserInterfaceItem{
 }
 
 export interface IPurpose{
+  id:number;
+  productId:number;
+  product?:IProduct;
+  subMenuId:number|null;
   name:string;
   isActive:boolean;
 }
@@ -44,19 +55,19 @@ export interface IPurpose{
 export interface IProduct {
   avatar: string,
   category: string,
+  characteristics:ICharacteristics[],
+  comments: IComment[],
   discount:boolean,
-  favorites?:IFavorites,
   full_info:string,
   id:number,
   images:string[],
   isFavor:boolean,
   price:number,
-  characteristics:ICharacteristics,
+  purpose:IPurpose[],
   subCategory: string,
+  favorites?:IFavorites,
   title: string,
-  comments?: IComment[];
-  userComunications?:IUserInterfaceItem[],
-  purpose?:IPurpose[]
+  userComunications:IUserInterfaceItem[],
 }
 
 

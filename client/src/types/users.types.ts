@@ -14,4 +14,22 @@ export interface IUser{
 }
 
 
+export interface IUser2{
+    email:string|null;
+    password:string|null;
+    id:number;
+    role:'ADMIN'|'USER';
+    userInfo:IUserInfo;
+}
 
+
+export interface IUserInfo{
+    firstname:string;
+    lastname:string;
+    id:number;
+    telphone:string;
+    avatar:string;
+    agrements:boolean;
+    userId:number;
+    user_id:number; // mistake zaglushka
+}

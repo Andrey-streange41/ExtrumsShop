@@ -19,17 +19,20 @@ import {
   removeFromFavoriteListThunk,
 } from "../../app/slices/productsListSlice.ts";
 import { getCommentsThunk } from "../../app/slices/commentsSlice.ts";
+import Loader from "../../components/Loader/index.tsx";
+import { IProduct, IUserInterfaceItem } from "../../types/favoriteList.types.js";
 
 export const Detail: FC = () => {
   const { id } = useParams();
   const productList = useSelector((s) => s.productsList.testList);
-  const item = productList.filter((item) => item.id === Number(id))[0];
+  const [item,setItem] = useState<IProduct>();
   const dispatch = useDispatch();
   const isAuth = useSelector((s) => s.user.isAuth);
-  const [coms, setComs] = useState([]);
+  const [coms, setComs] = useState<IUserInterfaceItem[]>([]);
   const user = useSelector((s) => s.user.userData);
   const loading = useSelector((s) => s.productsList.loading);
-  const comments =useSelector(s=>s.comments.comments);
+  const error = useSelector(s=>productList.error);
+  
 
   const handleFavoriteClick = () => {
     if (!isAuth) {
@@ -62,21 +65,29 @@ export const Detail: FC = () => {
   };
 
   useEffect(() => {
-
-    dispatch(getCommentsThunk(item?.id)).then((data)=>{console.log(data.data,'DETAIL*');
-    })
-    
+    setItem(productList.filter((item) => item.id === Number(id))[0]);
     if (loading === "idle") {
-      setComs(
-        [...item?.userComunications]?.sort((a, b) =>
-          String(a.name).localeCompare(b.name)
+      setComs([...productList.filter((item) => item.id === Number(id))[0]?.userComunications]
+       ?.sort((a, b) =>
+          {return String(a.name).localeCompare(b.name)}
         )
       );
-    }
-  }, [item?.comments]);
+    };
+  }, [item?.id, loading]);
 
-  return loading !== "idle" && !item ? (
-    <h1>loading ...</h1>
+    if(loading === 'failed')
+    {
+      return <h1>{error.message}</h1>
+    }
+
+
+
+  return loading === "penging" || !item ? (
+   <section className={ms.loader}> 
+    <Header/>
+      <Loader/> 
+      <h1>Loading...</h1>
+   </section>
   ) : (
     <>
       <section className={ms.container}>
@@ -90,7 +101,7 @@ export const Detail: FC = () => {
                   className={ms.container__field__content__row1__galery__swiper}
                 >
                   <ProductImagesSlider
-                    images={item?.images ? JSON.parse(item.images) : []}
+                    images={item?.images ? JSON.parse(item?.images) : []}
                   />
                 </section>
               </section>
@@ -98,7 +109,7 @@ export const Detail: FC = () => {
                 <section
                   className={ms.container__field__content__row1__cardInfo__UI}
                 >
-                  {coms.map((el, index) => (
+                  {coms?.map((el, index) => (
                     <section
                       key={index}
                       className={
@@ -181,7 +192,7 @@ export const Detail: FC = () => {
                     ms.container__field__content__row1__cardInfo__addInfo
                   }
                 >
-                  {item?.characteristics.map((el) => (
+                  {item?.characteristics?.map((el) => (
                     <section
                       key={Math.random()}
                       className={
@@ -216,7 +227,7 @@ export const Detail: FC = () => {
               </section>
             </section>
             <section className={ms.container__field__content__row2}>
-              {<Menu item={item} />}
+              {<Menu  item={item} />}
             </section>
           </section>
         </section>
@@ -241,7 +252,7 @@ const Menu = ({ item }) => {
     {
       isActive: false,
       text: `Comments (${item?.comments.length})`,
-      modal: <CommentsList item={item} />,
+      modal: <CommentsList item={item}/>,
     },
     {
       isActive: false,
@@ -249,6 +260,12 @@ const Menu = ({ item }) => {
       modal: <ViewsChart item={item} />,
     },
   ]);
+ 
+  const dispatch = useDispatch();
+  useEffect(()=>{
+        dispatch(getCommentsThunk(item?.id));
+        setItems(menuItems);
+  },[item.comments,item]);
 
   return (
     <>
@@ -295,7 +312,7 @@ const Characteristics = ({ item }) => {
             ms.container__field__content__row2__characteristics__leftMenu
           }
         >
-          {item.characteristics.map((item, index) => {
+          {item?.characteristics?.map((item, index) => {
             if (index > 2) {
               return;
             }
@@ -306,8 +323,8 @@ const Characteristics = ({ item }) => {
                   ms.container__field__content__row2__characteristics__leftMenu__row
                 }
               >
-                <span>{item.name}</span>
-                <span>{item.info}</span>
+                <span>{item?.name}</span>
+                <span>{item?.info}</span>
               </section>
             );
           })}
@@ -317,7 +334,7 @@ const Characteristics = ({ item }) => {
             ms.container__field__content__row2__characteristics__rightMenu
           }
         >
-          {item.characteristics.map((item, index) => {
+          {item?.characteristics?.map((item, index) => {
             if (index <= 2) {
               return;
             }

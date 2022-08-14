@@ -2,54 +2,53 @@ import { Routes, Route } from "react-router-dom";
 import "./assets/scss/style.scss";
 import "./assets/scss/reset.css";
 import { Home } from "./pages/Home/Home";
-import { Favorite } from "./pages/Favorite/Favorite";
+import { Favorite } from "./pages/Favorite/Favorite.tsx";
 import { Catalog } from "./pages/Catalog/index.tsx";
 import { Detail } from "./pages/Detail/index.tsx";
 import { AccountInfo } from "./pages/AccountInfo/index.tsx";
 import { Registration } from "./pages/Authorization/Registration.tsx";
 import { Login } from "./pages/Authorization/Login.tsx";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { isAuth } from "./http/userAPI.ts";
-import { setAuth, setUserData } from "./app/slices/userSlice.ts";
+import { setAuth } from "./app/slices/userSlice.ts";
 import jwt_decode from "jwt-decode";
-import { getUserById } from "./http/userAPI.ts";
 import { getUserByIdChunck } from "./app/slices/userSlice.ts";
 import { Admin } from "./pages/Admin/index.tsx";
 import { AddProduct } from "./pages/AddProduct/index.tsx";
-import {
-  getProductsThunk,
-} from "./app/slices/productsListSlice.ts";
-
+import { getProductsThunk } from "./app/slices/productsListSlice.ts";
+import Loader from "./components/Loader/index.tsx";
 import { getFavorListThunk } from "./app/slices/productsListSlice.ts";
 
 function App() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const favorList = useSelector(s=>s.productsList.favoriteList);
-  const user = useSelector(s=>s.user)
-  const isAuthuser = useSelector(s=>s.user.isAuth)
 
   useEffect(() => {
- 
-    isAuth().then(() => {
-      dispatch(setAuth(true));
-    }).finally(()=>{
-      setLoading(false); 
+    dispatch(getProductsThunk()).then(() => {
+      isAuth()
+        .then(() => {
+          dispatch(setAuth(true));
+        })
+        .then(() => {
+          const id = jwt_decode(localStorage.getItem("token")).id;
+          if (id) {
+            dispatch(getUserByIdChunck(id));
+            dispatch(getFavorListThunk(id));
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     });
-  
-      if(localStorage.getItem('token'))
-      {
-        dispatch(getUserByIdChunck(jwt_decode(localStorage.getItem('token')).id));
-      }
-     dispatch(getProductsThunk());
-   
-  }, [loading]);
-
-  
+  }, []);
 
   if (loading) {
-    return <section>Loading...</section>;
+    return (
+      <section>
+        <Loader />
+      </section>
+    );
   }
 
   return (

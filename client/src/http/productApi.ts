@@ -65,8 +65,6 @@ export const getFavoriteList = async (userId:number)=> {
 export const addComment = async(data)=>{
   try {
     const responce = await $host.post('api/products/comments', data);
-    console.log(responce.data);
-    
     return responce.data;
   } catch (error) {
     console.log(error.message);

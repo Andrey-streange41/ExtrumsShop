@@ -9,7 +9,7 @@ export const getCommentsThunk = createAsyncThunk(
             const comments = await getComments(id);
             return comments;
         } catch (error) {
-            rejectWithValue(error);
+            rejectWithValue(error.message);
         }
     }
 );
@@ -44,8 +44,8 @@ export const commentsSlice = createSlice(
               [String(getCommentsThunk.fulfilled)]: (state, action) => {
                 const { requestId } = action.meta;
                 if (state.loading === "pending" && requestId === state.currentRequestId) {
-                  state.loading = "idle";
-                  state.comments = [...action.payload];
+                  state.loading = "succeeded";
+                  
                   state.currentRequestId = undefined;
                 }
               },
@@ -53,7 +53,7 @@ export const commentsSlice = createSlice(
                 const { requestId } = action.meta;
                 if (state.loading === "pending" && requestId === state.currentRequestId) {
                   state.error = action.payload;
-                  state.loading = "idle";
+                  state.loading = "failed";
                   state.currentRequestId = undefined;
                 }
               }

@@ -216,3 +216,16 @@
 .scaleUp:hover {
   transform: scale(1.1);
 }
+
+.loader {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background: #ebecee;
+}
+
+.loader h1 {
+  position: absolute;
+  top: 40%;
+  font-size: 12px;
+}

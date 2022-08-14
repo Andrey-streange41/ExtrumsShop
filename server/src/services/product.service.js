@@ -58,7 +58,7 @@ class ProductService {
 
       return responce;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       return error.message;
     }
   }
@@ -78,7 +78,20 @@ class ProductService {
       const offset = limit * page - limit;
 
       if (!category) {
-        products = await Product.findAll({ include: { all: true } });
+        products = await Product.findAll({
+          include: [
+            {
+              model: Comments,
+              include: [
+                { model: Date },
+                { model: User, include: { model: UserInfo } },
+              ],
+            },
+            { model: UserCommunication },
+            { model: Purpose,include:{model:Product}, as:"purpose" },
+            { model:Characteristics, as:"characteristics"}
+          ],
+        });
       } else if (category && !subcategory) {
         products = await Product.findAndCountAll({
           where: { category },
@@ -166,6 +179,7 @@ class ProductService {
       }
       return products;
     } catch (error) {
+      console.error(error.message);
       return error.message;
     }
   }
@@ -177,6 +191,7 @@ class ProductService {
       });
       return product;
     } catch (error) {
+      console.error(error.message);
       return error.message;
     }
   }
@@ -218,16 +233,14 @@ class ProductService {
             { where: { productId: id, name: "dislikes" } }
           );
         }
-      }
-      else if(name === 'favorites')
-      { 
-          const favor = await UserCommunication.findOne({
+      } else if (name === "favorites") {
+        const favor = await UserCommunication.findOne({
           where: { productId: id, name: "favorites" },
         });
-        if(favor.isActive){
+        if (favor.isActive) {
           const fav = favor.amount - 1;
           await UserCommunication.update(
-            { amount:fav, isActive: false },
+            { amount: fav, isActive: false },
             { where: { productId: id, name: "favorites" } }
           );
         }
@@ -240,79 +253,98 @@ class ProductService {
 
       return data;
     } catch (error) {
+      console.error(error.message);
       return error;
     }
   }
   async addToFavorite(data) {
     try {
-       console.error('Removing ... ');
+      console.error("Removing ... ");
       const { productId, userId } = data;
-     
-      const favItems = await FavoriteList.findAll({where:{productId,userId}}); // check
-      
+
+      const favItems = await FavoriteList.findAll({
+        where: { productId, userId },
+      }); // check
 
       await FavoriteList.create({ productId, userId });
 
-      const user = await Product.findAll({include:[{model:User,where:{id:userId}},{all:true}]});
+      const user = await Product.findAll({
+        include: [{ model: User, where: { id: userId } }, { all: true }],
+      });
       return user;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       return error.message;
     }
   }
-  
-  async removeFromFavorite({data}) {
+
+  async removeFromFavorite({ data }) {
     try {
       const { productId, userId } = data;
-      await FavoriteList.destroy({ where: { productId:productId, userId:userId } });
-     
-      const user = await Product.findAll({include:[{model:User,where:{id:userId}},{all:true}]});
+      await FavoriteList.destroy({
+        where: { productId: productId, userId: userId },
+      });
+
+      const user = await Product.findAll({
+        include: [{ model: User, where: { id: userId } }, { all: true }],
+      });
       return user;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       return error;
     }
   }
-  async getFavorList({id}){
-  try {
-    const user = await Product.findAll({include:[{model:User,where:{id:id}},{all:true}]});
-    return user;
-  } catch (error) {
-    return error.message;
+  async getFavorList({ id }) {
+    try {
+      const user = await Product.findAll({
+        include: [{ model: User, where: { id: id } }, { all: true }],
+      });
+      return user;
+    } catch (error) {
+      console.error(error.message);
+      return error.message;
+    }
+  }
+
+  async addComments(data) {
+    try {
+      const { day, month, year, minute, hour } = data.comment.date;
+      const { textMessage } = data.comment;
+      const { userId, productId } = data;
+      const date = await Date.create({ day, month, year, min: minute, hour });
+      const comments = await Comments.create({
+        message: textMessage,
+        dateId: date.id,
+        userId,
+        productId,
+      });
+      const product = await Product.findOne({
+        include: { all: true },
+        where: { id: productId },
+      });
+      return product;
+    } catch (error) {
+      console.error(error.message);
+      return error.message;
+    }
+  }
+
+  async getComments({ id }) {
+    try {
+      const results = await Comments.findAll({
+        include: [
+          { model: User, include: { model: UserInfo } },
+          { model: Date },
+        ],
+        where: { productId: id },
+      });
+
+      return results;
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
   }
 }
-
-async addComments(data){
-  try {console.log(data);
-    const {day,month,year,minute,hour} = data.comment.date;
-    const {textMessage} = data.comment;
-    const {userId,productId} = data;
-    console.log(data);
-    
-    const date = await Date.create({day,month,year,min:minute,hour});
-    const comments = await Comments.create({message:textMessage,dateId:date.id,userId,productId});
-
-
-    const product = await Product.findOne({include:{all:true},where:{id:productId}});
-    
-    return product;
-  } catch (error) {
-    console.log(error.message);
-    return error.message;
-  }
-}
-
-
-async getComments({id}){
-  try {
-    const results = await Comments.findAll({include:{all:true,include:{all:true}},where:{productId:id}});
-    return results;
-  } catch (error) {
-    console.log(error.message);
-    return error;
-  }
-}
-}
-
 
 module.exports = new ProductService();
