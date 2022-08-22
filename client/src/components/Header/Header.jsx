@@ -31,10 +31,10 @@ const Header = () => {
 
   const logout = () => {
     dispatch(setAuth(false));
-    dispatch(setUserData({}));
+    // dispatch(setUserData({}));
     localStorage.removeItem("token");
     nav("/");
-    dispatch(logoutThunk());
+    // dispatch(logoutThunk());
   };
 
   useEffect(() => {
@@ -43,10 +43,6 @@ const Header = () => {
       dispatch(
         getUserByIdChunck(jwt_decode(localStorage.getItem("token")).id)
       ).then((data) => {
-        console.log(
-          "http://localhost:5000/" + data.payload.userInfo.avatar,
-          "tutta"
-        );
         setPhoto("http://localhost:5000/" + data.payload.userInfo.avatar);
       });
     }

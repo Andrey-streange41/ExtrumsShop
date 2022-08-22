@@ -66,7 +66,9 @@ export const ProductCard: FC<ICardProps> = ({ item }) => {
   };
 
   useEffect(() => {
-    if (item) {
+    if (item&&loading==='idle') {
+      console.log('GG');
+      
       setComs(
         [...item?.userComunications]?.sort(
           (a: IUserInterfaceItem, b: IUserInterfaceItem): number =>
@@ -89,7 +91,7 @@ export const ProductCard: FC<ICardProps> = ({ item }) => {
             onClick={handleFavoriteClick}
             src={
               item?.userComunications?.find((el) => el.name === "favorites")
-                ?.isActive
+                ?.isActive&&isAuth
                 ? userCommunication[2]
                 : userCommunication[6]
             }
@@ -194,15 +196,15 @@ export const ProductCard: FC<ICardProps> = ({ item }) => {
                       : () => {}
                   }
                   src={
-                    el.name === "likes" && el.isActive
+                    el.name === "likes" && el.isActive &&isAuth
                       ? userCommunication[4]
                       : el.name === "likes" && !el.isActive
                       ? userCommunication[0]
-                      : el.name === "dislikes" && el.isActive
+                      : el.name === "dislikes" && el.isActive&&isAuth
                       ? userCommunication[1]
                       : el.name === "dislikes" && !el.isActive
                       ? userCommunication[5]
-                      : el.name === "favorites" && el.isActive
+                      : el.name === "favorites" && el.isActive&&isAuth
                       ? userCommunication[2]
                       : el.name === "favorites" && !el.isActive
                       ? userCommunication[6]

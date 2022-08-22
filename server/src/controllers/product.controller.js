@@ -7,7 +7,7 @@ class ProductController {
   async addProduct(req, res, next) {
     try {
       const images = req.files;
-      console.log(images.files);
+      
       if(!images){
         throw  res.status(500).json('Images for product is a required attribut !');
       }

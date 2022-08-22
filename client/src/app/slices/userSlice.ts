@@ -314,22 +314,30 @@ export const userSlice = createSlice({
     },
 
     [String(changeUserRoleThunk.pending)]: (state, action) => {
+      console.log('step1');
       if (state.loading === "idle") {
+        console.log('step2');
+        
         state.loading = "pending";
         state.currentRequestId = action.meta.requestId;
       }
     },
     [String(changeUserRoleThunk.fulfilled)]: (state, action) => {
+      console.log('step3');
+      
       const { requestId } = action.meta;
       if (state.loading === "pending" && state.currentRequestId === requestId) {
+        console.log('step4');
         state.loading = "idle";
         state.currentRequestId = undefined;
         state.users = [...action.payload];
       }
     },
     [String(changeUserRoleThunk.rejected)]: (state, action) => {
+      console.log('error1');
       const { requestId } = action.meta;
       if (state.loading === "pending" && state.currentRequestId === requestId) {
+        console.log('error2');
         state.loading = "idle";
         state.error = action.error;
         state.currentRequestId = undefined;

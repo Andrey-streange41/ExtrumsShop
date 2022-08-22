@@ -104,7 +104,6 @@ export const AccountInfo: FC = () => {
       
       dispatch(getUserByIdChunck(jwt_decode(localStorage.getItem('token')).id)).
       then((data)=>{
-        console.log(data);
         const {firstname,lastname,avatar,telphone} = data.payload.userInfo;
          setUser({
         ...user,
@@ -290,10 +289,8 @@ export const AccountInfo: FC = () => {
 
   const logout = () => {
     dispatch(setAuth(false));
-    dispatch(setUserData({}));
     localStorage.removeItem("token");
     nav("/");
-    dispatch(logoutThunk());
     dispatch(getUserByIdChunck());
   };
 

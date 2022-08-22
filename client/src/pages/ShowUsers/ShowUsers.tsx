@@ -10,6 +10,9 @@ import { changeUserRoleThunk } from "../../app/slices/userSlice.ts";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks.ts";
 import { RootState } from "../../app/store.ts";
+import { getUserByIdChunck } from "../../app/slices/userSlice.ts";
+import jwt_decode from 'jwt-decode';
+
 
 export const ShowUsers = () => {
   const users = useAppSelector((s:RootState) => s.user.users);
@@ -29,7 +32,8 @@ export const ShowUsers = () => {
     if (role === "USER") {
       nav("/");
     }
-  }, []);
+    
+ }, [users,role]);
 
   return (
     <>
@@ -68,6 +72,8 @@ export const ShowUsers = () => {
                     <i
                       className={ms.up}
                       onClick={() => {
+                        console.log('keick');
+                        
                         dispatch(
                           changeUserRoleThunk({ role: "ADMIN", id: el.id })
                         );

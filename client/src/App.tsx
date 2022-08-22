@@ -28,7 +28,7 @@ function App() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(true);
   const isAuths = useAppSelector(s=>s.user.isAuth)
- const user = useAppSelector(s=>s.user);
+  const user = useAppSelector(s=>s.user);
 
 
   useEffect(() => {
