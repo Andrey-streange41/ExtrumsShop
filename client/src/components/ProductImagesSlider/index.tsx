@@ -2,11 +2,17 @@ import React, { useState } from "react";
 import { Navigation, Thumbs } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "./product-images-slider.scss";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { removeProductInfoThunk } from "../../app/slices/productsListSlice.ts";
+import { useAppDispatch,useAppSelector } from "../../hooks.ts";
+import { RootState } from "../../app/store.ts";
 
-export const ProductImagesSlider = ({images}: IPropTypes) => {
+export const ProductImagesSlider = ({images,id}: IPropTypes) => {
   const [target,setTarget] = useState();
-  
-  
+  const dispatch = useAppDispatch();
+  const role = useAppSelector((s:RootState)=>s.user.userData.role);
+
   return (
     <>
       <Swiper
@@ -18,7 +24,7 @@ export const ProductImagesSlider = ({images}: IPropTypes) => {
         grabCursor={true}
         className={"product-images-slider"}
       >
-        {images.map((i, index) => (
+        {images?.map((i:string, index:number) => (
           <SwiperSlide key={index}>
             <img  src={'http://localhost:5000/' + i} alt="product images" />
           </SwiperSlide>
@@ -29,15 +35,24 @@ export const ProductImagesSlider = ({images}: IPropTypes) => {
         spaceBetween={10}
         onSwiper={setTarget}
         modules={[Navigation, Thumbs]}
-        slidesPerView={images.length}
+        slidesPerView={images?.length}
         className={"product-images-slider-thumbs"}
       >
-        {images.map((i, index) => (
+        {images?.map((i, index) => (
           <SwiperSlide key={index}>
           <section className="product-images-slider-thumbs-wrapper">
               <img style={{cursor:'grab'}} src={'http://localhost:5000/' +i} alt="product images" />
+           {role==='ADMIN'? <FontAwesomeIcon
+              className='remove'
+              icon={faXmark}
+              onClick={() => {
+                dispatch(
+                  removeProductInfoThunk({ id:id, imageId:i })
+                );
+          }}
+        /> :null}   
+             
           </section>
-           
           </SwiperSlide>
         ))}
       </Swiper>
@@ -47,4 +62,5 @@ export const ProductImagesSlider = ({images}: IPropTypes) => {
 
 interface IPropTypes {
   images: string[];
+  id:number;
 }

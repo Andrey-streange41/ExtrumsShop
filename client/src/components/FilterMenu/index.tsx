@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ms from "./style.module.scss";
 import birdDown from "../../assets/images/birdDown.png";
 import birdUp from "../../assets/images/birdUpModal.png";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { selectModalItem } from "../../app/slices/navBarSlice.ts";
-import { CheckBox } from "./CheckBox/index.jsx";
+import { CheckBox } from "./CheckBox/index.tsx";
 import closeModal from "../../assets/images/closeModal.png";
 import { switchFilterMenu } from "../../app/slices/toolsPanelSlice.ts";
 import {
@@ -12,24 +12,52 @@ import {
   switchPriceMenu,
   switchAddMenu1,
   switchAddMenu2,
+  setPrice,
 } from "../../app/slices/modalFilterSlice.ts";
-import { setFilteredList ,setFavorFilterList} from "../../app/slices/productsListSlice.ts";
+import { getProductsThunk } from "../../app/slices/productsListSlice.ts";
+import { useAppSelector } from "../../hooks.ts";
+import { RootState } from "../../app/store.ts";
+
 
 export const FilterMenu = () => {
-  const subMenu = useSelector((s) => s.navBar.subMenu);
-  const isOpenCategoryMenu = useSelector(
-    (s) => s.modalFilter.isOpenCategoryMenu
+  const subMenu = useAppSelector((s:RootState) => s.navBar.subMenu);
+  const isOpenCategoryMenu = useAppSelector(
+    (s:RootState) => s.modalFilter.isOpenCategoryMenu
   );
   const dispatch = useDispatch();
-  const isActiveFilterMenu = useSelector(
-    (s) => s.toolsPanel.isActiveFilterMenu
+  const isActiveFilterMenu = useAppSelector(
+    (s:RootState) => s.toolsPanel.isActiveFilterMenu
   );
-  const isOpenPriceMenu = useSelector((s) => s.modalFilter.isOpenPriceMenu);
-  const isOpenAddMenu_1 = useSelector((s) => s.modalFilter.isOpenAddMenu_1);
-  const isOpenAddMenu_2 = useSelector((s) => s.modalFilter.isOpenAddMenu_2);
-  const productsList = useSelector((s) => s.productsList.productsList);
-  const filteredList = useSelector((s) => s.productsList.filteredList);
-  const favoriteList = useSelector(s=>s.productsList.favoriteList);
+  const isOpenPriceMenu = useAppSelector((s:RootState) => s.modalFilter.isOpenPriceMenu);
+  const isOpenAddMenu_2 = useAppSelector((s:RootState) => s.modalFilter.isOpenAddMenu_2);
+  const price = useAppSelector((s:RootState) => s.modalFilter.price);
+
+  const [purposeList,setPurposeList] = useState<string[]>([]);
+
+  useEffect(() => {
+    getFilter();   
+  }, [price,purposeList.length]);
+
+  const handleSelectPurpose = (purposeItem:any) => {
+      if(purposeItem.isActive){
+        setPurposeList([...purposeList, purposeItem.text]);
+      }
+      else{
+        setPurposeList(purposeList.filter(el=>el!== purposeItem.text));
+      }
+  }
+
+  const getFilter = async () => {
+    const query = {
+      purposes: purposeList,
+      category: subMenu[subMenu.findIndex((el) => el.isActive)]?.text,
+      sub_category: subMenu
+        .find((el) => el.isActive)
+        ?.modalItems?.items?.find((el) => el.isActive)?.category,
+      price: price,
+    };
+      dispatch(getProductsThunk(query));
+  };
 
   return (
     <section
@@ -71,16 +99,13 @@ export const FilterMenu = () => {
                 <li>
                   <div
                     className={item.isActive ? ms.radioActive : null}
-                    onClick={() => {
-                      dispatch(
-                        setFilteredList(
-                          productsList.filter(
-                            (el) =>
-                              String(el.subCategory).toLowerCase() ===
-                              String(item.category).toLowerCase()
-                          )
-                        )
-                      );
+                    onClick={(e) => {
+                      const query = {
+                        category:
+                          subMenu[subMenu.findIndex((el) => el.isActive)]?.text,
+                        sub_category: item?.category,
+                      };
+                      dispatch(getProductsThunk(query));
                       dispatch(selectModalItem(index));
                     }}
                   ></div>
@@ -109,47 +134,28 @@ export const FilterMenu = () => {
         }
       >
         <input
+          name={"min"}
+          value={price.min}
           type="text"
           placeholder="10$"
           maxLength={6}
-          onChange={(e) =>
-           { dispatch(
-              setFilteredList(
-                filteredList.filter((el) => el.price >= Number(e.target.value))
-              )
-            );
-            dispatch(setFavorFilterList(favoriteList.filter((el) => el.price >= Number(e.target.value))));}
-          }
+          onChange={(e) => {
+               dispatch(setPrice({ ...price, [e.target.name]: e.target.value }));
+          }}
         />
         <div className={ms.line}></div>
-        <input type="text" placeholder="156000$" maxLength={6} />
-      </section>
-      <div className={ms.border}></div>
-      <section className={ms.container__categories}>
-        <img
-          src={isOpenAddMenu_1 ? birdDown : birdUp}
-          alt="bird.png"
-          onClick={() => dispatch(switchAddMenu1())}
+        <input
+          name="max"
+          type="text"
+          placeholder="156000$"
+          maxLength={6}
+          value={price.max}
+          onChange={(e) => {
+            dispatch(setPrice({ ...price, [e.target.name]: e.target.value }));
+          }}
         />
-        <h2>{subMenu.find((el) => el.isActive)?.characteristics.title} </h2>
       </section>
-      <section
-        className={
-          isOpenAddMenu_1
-            ? ms.container__checkboxMenu1
-            : ms.container__checkboxMenu1 + " " + ms.unactive
-        }
-      >
-        {subMenu.find((el) => el.isActive) ? (
-          subMenu
-            .find((el) => el.isActive)
-            ?.characteristics.charList.map((item) => (
-              <CheckBox key={item.name} item={{ ...item, text: subMenu.text }} />
-            ))
-        ) : (
-          <h1>Select category !</h1>
-        )}
-      </section>
+      
       <div className={ms.border}></div>
       <section className={ms.container__categories}>
         <img
@@ -170,7 +176,11 @@ export const FilterMenu = () => {
           subMenu
             .find((el) => el.isActive)
             ?.purpose.map((item) => (
-              <CheckBox key={item.name} item={{ ...item, text: subMenu.text }} />
+              <CheckBox
+                handleSelect={handleSelectPurpose}
+                key={item.name}
+                item={{ ...item, text: subMenu.text }}
+              />
             ))
         ) : (
           <h1>Select category !</h1>

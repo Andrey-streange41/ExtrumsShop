@@ -1,15 +1,17 @@
 import React, { FC, useState, useEffect } from "react";
 import { Chart } from "react-google-charts";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/thumbs";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFloppyDisk, faPencil } from "@fortawesome/free-solid-svg-icons";
+// local imports
 import { Footer } from "../../components/Footer/index.jsx";
 import Header from "../../components/Header/Header.jsx";
 import { ProductImagesSlider } from "../../components/ProductImagesSlider/index.tsx";
 import { NavBar } from "../../components/NavBar/index.jsx";
 import ms from "./style.module.scss";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/thumbs";
 import { userCommunication } from "../../assets/images/index.js";
 import birka from "../../assets/images/birka.png";
 import { CommentsList } from "./CommentsList/index.tsx";
@@ -17,22 +19,41 @@ import {
   updateProductsThunk,
   addToFavoritesThunk,
   removeFromFavoriteListThunk,
+  updateProductInfoThunk,
+  addProductInfoThunk,
+  addCharacteristicThunk,
+  removeProductThunk,
 } from "../../app/slices/productsListSlice.ts";
-import { getCommentsThunk } from "../../app/slices/commentsSlice.ts";
 import Loader from "../../components/Loader/index.tsx";
-import { IProduct, IUserInterfaceItem } from "../../types/favoriteList.types.js";
+import {
+  IProduct,
+  IUserInterfaceItem,
+} from "../../types/favoriteList.types.js";
+import { CharacteristicItem } from "./CharacteristicItem/index.tsx";
+import { KeyValueInput } from "../../components/UI/KeyValueInput/index.tsx";
+import { useAppDispatch, useAppSelector } from "../../hooks.ts";
+import { RootState } from "../../app/store.ts";
 
 export const Detail: FC = () => {
   const { id } = useParams();
-  const productList = useSelector((s) => s.productsList.testList);
-  const [item,setItem] = useState<IProduct>();
-  const dispatch = useDispatch();
-  const isAuth = useSelector((s) => s.user.isAuth);
+  const nav = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const [item, setItem] = useState<IProduct>();
   const [coms, setComs] = useState<IUserInterfaceItem[]>([]);
-  const user = useSelector((s) => s.user.userData);
-  const loading = useSelector((s) => s.productsList.loading);
-  const error = useSelector(s=>productList.error);
-  
+  const [editing, setEditing] = useState<boolean>(false);
+  const [title, setTitle] = useState<string>(item?.title || "");
+  const [price, setPrice] = useState<number>(item?.price || 0);
+  const [priceEditing, setPriceEditing] = useState<boolean>(false);
+  const [editingChar, setEditingChar] = useState<boolean>(false);
+  const [isEditDiscount, setEditingDiscount] = useState<boolean>(false);
+  const [discountPrice, setDiscountPrice] = useState<number>(0);
+
+  const role = useAppSelector((s:RootState) => s.user.userData.role);
+  const user = useAppSelector((s:RootState) => s.user.userData);
+  const loading = useAppSelector((s:RootState) => s.productsList.loading);
+  const isAuth = useAppSelector((s:RootState) => s.user.isAuth);
+  const productList = useAppSelector((s:RootState) => s.productsList.testList);
 
   const handleFavoriteClick = () => {
     if (!isAuth) {
@@ -42,52 +63,68 @@ export const Detail: FC = () => {
     dispatch(
       updateProductsThunk({
         name: "favorites",
-        id: item.id,
+        id: item?.id,
       })
     )
-      .then((data) => {
+      .then((data: any) => {
         const favoriteState = data.payload
-          .find((el) => el.id === item.id)
-          .userComunications.find((el) => el.name === "favorites").isActive;
+          .find((el: IProduct) => el.id === item?.id)
+          .userComunications.find(
+            (el: IUserInterfaceItem) => el.name === "favorites"
+          ).isActive;
         if (favoriteState === true) {
           dispatch(
-            addToFavoritesThunk({ productId: item.id, userId: user.id })
+            addToFavoritesThunk({ productId: item?.id, userId: user.id })
           );
         } else {
           dispatch(
-            removeFromFavoriteListThunk({ productId: item.id, userId: user.id })
+            removeFromFavoriteListThunk({
+              productId: item?.id,
+              userId: user.id,
+            })
           );
         }
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.log(err.message);
       });
   };
 
+  interface IChars {
+    name: string;
+    info: string;
+  }
+  const handleCharAdding = (chars: IChars) => {
+    setEditingChar(false);
+    dispatch(
+      addCharacteristicThunk({ key: chars.name, value: chars.info, id: id })
+    );
+  };
+
   useEffect(() => {
-    setItem(productList.filter((item) => item.id === Number(id))[0]);
+    setItem(productList?.filter((item: IProduct) => item.id === Number(id))[0]);
+    setTitle(String(item?.title));
+    setPrice(Number(item?.price));
+    setDiscountPrice(Number(item?.discountPrice));
+
     if (loading === "idle") {
-      setComs([...productList.filter((item) => item.id === Number(id))[0]?.userComunications]
-       ?.sort((a, b) =>
-          {return String(a.name).localeCompare(b.name)}
-        )
+      setComs(
+        [
+          ...productList.filter((item: IProduct) => item.id === Number(id))[0]
+            ?.userComunications,
+        ]?.sort((a, b) => {
+          return String(a.name).localeCompare(b.name);
+        })
       );
-    };
-  }, [item?.id, loading]);
-
-    if(loading === 'failed')
-    {
-      return <h1>{error.message}</h1>
     }
-
-
+  }, [item?.id, loading, item?.title, item?.price, item?.discountPrice]);
 
   return loading === "penging" || !item ? (
-   <section className={ms.loader}> 
-    <Header/>
-      <Loader/> 
+    <section className={ms.loader}>
+      <Header />
+      <Loader />
       <h1>Loading...</h1>
-   </section>
+    </section>
   ) : (
     <>
       <section className={ms.container}>
@@ -101,10 +138,30 @@ export const Detail: FC = () => {
                   className={ms.container__field__content__row1__galery__swiper}
                 >
                   <ProductImagesSlider
-                    images={item?.images ? JSON.parse(item?.images) : []}
+                    id={item.id}
+                    images={
+                      item?.images ? JSON.parse(String(item?.images)) : []
+                    }
                   />
                 </section>
+                {role === "ADMIN" ? (
+                  <button className={ms.addImage}>
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        const formData = new FormData();
+                        if (e.target.files?.length) {
+                          formData.append("newImage", e.target.files[0]);
+                          formData.append("id", JSON.stringify(id));
+                          dispatch(addProductInfoThunk(formData));
+                        }
+                      }}
+                    />
+                    Add Image
+                  </button>
+                ) : null}
               </section>
+
               <section className={ms.container__field__content__row1__cardInfo}>
                 <section
                   className={ms.container__field__content__row1__cardInfo__UI}
@@ -185,49 +242,237 @@ export const Detail: FC = () => {
                     ms.container__field__content__row1__cardInfo__title
                   }
                 >
-                  {item?.title}
+                  <section
+                    className={
+                      ms.container__field__content__row1__cardInfo__title__block
+                    }
+                  >
+                    <span className={editing ? ms.dNone : ms.dFlex}>
+                      {title}
+                    </span>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className={
+                        ms.container__field__content__row1__cardInfo__title__block__titleEdit +
+                        " " +
+                        (editing ? ms.dFlex : ms.dNone)
+                      }
+                    />
+                    {role === "ADMIN" ? (
+                      <>
+                        {" "}
+                        <FontAwesomeIcon
+                          className={
+                            ms.pencil + " " + (!editing ? ms.dFlex : ms.dNone)
+                          }
+                          icon={faPencil}
+                          onClick={() => {
+                            setEditing(true);
+                          }}
+                        />
+                        <FontAwesomeIcon
+                          id="save"
+                          className={
+                            ms.save + " " + (editing ? ms.dFlex : ms.dNone)
+                          }
+                          icon={faFloppyDisk}
+                          onClick={() => {
+                            setEditing(false);
+                            dispatch(
+                              updateProductInfoThunk({
+                                id: item.id,
+                                title: title,
+                              })
+                            );
+                          }}
+                        />
+                      </>
+                    ) : null}
+                  </section>
                 </h2>
                 <section
                   className={
                     ms.container__field__content__row1__cardInfo__addInfo
                   }
                 >
-                  {item?.characteristics?.map((el) => (
-                    <section
-                      key={Math.random()}
-                      className={
-                        ms.container__field__content__row1__cardInfo__addInfo__descr
-                      }
-                    >
-                      <span
-                        className={
-                          ms.container__field__content__row1__cardInfo__addInfo__descr__design
-                        }
-                      >
-                        {el.name}
-                      </span>
-                      <span
-                        className={
-                          ms.container__field__content__row1__cardInfo__addInfo__descr__text
-                        }
-                      >
-                        {el.info}
-                      </span>
-                    </section>
+                  {item?.characteristics.map((el) => (
+                    <CharacteristicItem
+                      key={Math.random().toString().substring(5, 10)}
+                      el={el}
+                      item={item}
+                    />
                   ))}
                 </section>
+
+                {role === "ADMIN" ? (
+                  <button
+                    className={ms.addImage}
+                    onClick={() => {
+                      if (!editingChar) {
+                        setEditingChar(true);
+                      }
+                    }}
+                  >
+                    Add Property
+                  </button>
+                ) : null}
+                <section className={editingChar ? ms.dFlex : ms.dNone}>
+                  <KeyValueInput add={handleCharAdding} />
+                </section>
+
                 <section
                   className={
                     ms.container__field__content__row1__cardInfo__price
                   }
                 >
+                  {role === "ADMIN" ? (
+                    <>
+                      {" "}
+                      <button
+                        className={
+                          ms.addImage +
+                          " " +
+                          (discountPrice > 0 ? ms.dFlex : ms.dNone)
+                        }
+                        onClick={() => {
+                          dispatch(
+                            updateProductInfoThunk({
+                              price,
+                              discountPrice: 0,
+                              id,
+                            })
+                          );
+                        }}
+                      >
+                        Drop Discount
+                      </button>
+                      <button
+                        className={
+                          ms.addImage +
+                          " " +
+                          (!isEditDiscount ? ms.dFlex : ms.dNone)
+                        }
+                        onClick={() => {
+                          setEditingDiscount(true);
+                        }}
+                      >
+                        Edit Discount
+                      </button>
+                    </>
+                  ) : null}
+
+                  <input
+                    value={discountPrice}
+                    onChange={(e) => {
+                      if (
+                        Number(e.target.value) !== NaN &&
+                        !Number.isNaN(Number(e.target.value))
+                      ) {
+                        setDiscountPrice(Number(e.target.value));
+                      }
+                    }}
+                    type="text"
+                    className={isEditDiscount ? ms.dFlex : ms.dNone}
+                  />
+                  <FontAwesomeIcon
+                    id="save"
+                    className={
+                      ms.save + " " + (isEditDiscount ? ms.dFlex : ms.dNone)
+                    }
+                    icon={faFloppyDisk}
+                    onClick={() => {
+                      setEditingDiscount(false);
+                      dispatch(
+                        updateProductInfoThunk({ price, discountPrice, id })
+                      );
+                    }}
+                  />
+                  <span
+                    className={
+                      ms.oldPrice +
+                      " " +
+                      (discountPrice > 0 ? ms.dFlex : ms.dNone)
+                    }
+                  >
+                    {price}
+                  </span>
                   <img src={birka} alt="birka.png" />
-                  <span>${item?.price}</span>
+                  <span
+                    className={
+                      (discountPrice > 0 && !isEditDiscount
+                        ? ms.discountPrice
+                        : null) +
+                      " " +
+                      (!priceEditing ? ms.dFlex : ms.dNone)
+                    }
+                  >
+                    ${discountPrice > 0 ? discountPrice : price}
+                  </span>
+                  <input
+                    type="text"
+                    maxLength={10}
+                    className={priceEditing ? ms.dFlex : ms.dNone}
+                    value={price}
+                    onChange={(e) => {
+                      if (
+                        Number(e.target.value) !== NaN &&
+                        !Number.isNaN(Number(e.target.value))
+                      ) {
+                        setPrice(Number(e.target.value));
+                      }
+                    }}
+                  />
+                  {role === "ADMIN" ? (
+                    <>
+                      <FontAwesomeIcon
+                        className={
+                          ms.pencil +
+                          " " +
+                          (!priceEditing ? ms.dFlex : ms.dNone)
+                        }
+                        icon={faPencil}
+                        onClick={() => {
+                          setPriceEditing(true);
+                        }}
+                      />
+                      <FontAwesomeIcon
+                        id="save"
+                        className={
+                          ms.save + " " + (priceEditing ? ms.dFlex : ms.dNone)
+                        }
+                        icon={faFloppyDisk}
+                        onClick={() => {
+                          setPriceEditing(false);
+                          dispatch(
+                            updateProductInfoThunk({
+                              id: item.id,
+                              price: price,
+                            })
+                          );
+                        }}
+                      />
+                    </>
+                  ) : null}
                 </section>
               </section>
             </section>
             <section className={ms.container__field__content__row2}>
-              {<Menu  item={item} />}
+              {<Menu item={item} />}
+            </section>
+            <section className={ms.container__field__content__row2__delete}>
+              {role === "ADMIN" ? (
+                <button
+                  className={ms.addImage}
+                  onClick={() => {
+                    dispatch(removeProductThunk(id));
+                    nav("/catalog");
+                  }}
+                >
+                  Delete Product
+                </button>
+              ) : null}
             </section>
           </section>
         </section>
@@ -237,35 +482,37 @@ export const Detail: FC = () => {
   );
 };
 
-const Menu = ({ item }) => {
-  const [menuItems, setItems] = useState([
+interface IMenuProps {
+  item: IProduct;
+}
+
+const Menu: FC<IMenuProps> = ({ item }) => {
+  let [menuItems, setItems] = useState([
     {
+      id: 1,
       isActive: true,
       text: "Description",
       modal: <FullInfo item={item} />,
     },
     {
+      id: 2,
       isActive: false,
       text: "Characteristics",
       modal: <Characteristics item={item} />,
     },
     {
+      id: 3,
       isActive: false,
       text: `Comments (${item?.comments.length})`,
-      modal: <CommentsList item={item}/>,
+      modal: <CommentsList item={item} />,
     },
     {
+      id: 4,
       isActive: false,
       text: "Price dynamics",
       modal: <ViewsChart item={item} />,
     },
   ]);
- 
-  const dispatch = useDispatch();
-  useEffect(()=>{
-        dispatch(getCommentsThunk(item?.id));
-        setItems(menuItems);
-  },[item.comments,item]);
 
   return (
     <>
@@ -284,7 +531,11 @@ const Menu = ({ item }) => {
               setItems(tmp);
             }}
           >
-            {el.text}
+            {index === 2 ? (
+              <span>{`Comments (${item?.comments.length})`}</span>
+            ) : (
+              el.text
+            )}
           </li>
         ))}
       </ul>
@@ -293,17 +544,75 @@ const Menu = ({ item }) => {
   );
 };
 
-const FullInfo = ({ item }) => {
+interface IFullInfoProps {
+  item: IProduct;
+}
+
+const FullInfo: FC<IFullInfoProps> = ({ item }) => {
+  const dispatch = useAppDispatch();
+  const [active, setActive] = useState<boolean>(true);
+  const [text, setText] = useState<string>(item.full_info);
+  const role = useAppSelector((s) => s.user.userData.role);
+
   return (
-    <>
-      <p className={ms.container__field__content__row2__textInfo}>
-        {item?.full_info}
+    <section className={ms.descrSection}>
+      <p
+        className={
+          ms.container__field__content__row2__textInfo +
+          " " +
+          (active ? ms.dFlex : ms.dNone)
+        }
+      >
+        {text}
       </p>
-    </>
+      <textarea
+        onChange={(e) => setText(e.target.value)}
+        cols={80}
+        className={
+          ms.container__field__content__row2__textInfo +
+          " " +
+          (!active ? ms.dFlex : ms.dNone)
+        }
+        id="area"
+        value={text}
+      ></textarea>
+
+      {role === "ADMIN" ? (
+        <label className={ms.editIconBlock} htmlFor="area">
+          <FontAwesomeIcon
+            className={ms.edit + " " + (active ? ms.dFlex : ms.dNone)}
+            icon={faPencil}
+            onClick={() => setActive(!active)}
+          />
+          <label className={active ? ms.dFlex : ms.dNone}>Edit</label>
+        </label>
+      ) : null}
+
+      <section className={ms.editIconBlock}>
+        <FontAwesomeIcon
+          id="save"
+          className={ms.save + " " + (!active ? ms.dFlex : ms.dNone)}
+          icon={faFloppyDisk}
+          onClick={() => {
+            setActive(!active);
+            dispatch(
+              updateProductInfoThunk({ description: text, id: item.id })
+            );
+          }}
+        />
+        <label className={!active ? ms.dFlex : ms.dNone} htmlFor="save">
+          Save
+        </label>
+      </section>
+    </section>
   );
 };
 
-const Characteristics = ({ item }) => {
+interface ICharsProps {
+  item: IProduct;
+}
+
+const Characteristics: FC<ICharsProps> = ({ item }) => {
   return (
     <>
       <section className={ms.container__field__content__row2__characteristics}>
@@ -323,8 +632,14 @@ const Characteristics = ({ item }) => {
                   ms.container__field__content__row2__characteristics__leftMenu__row
                 }
               >
-                <span>{item?.name}</span>
-                <span>{item?.info}</span>
+                <span
+                  className={
+                    ms.container__field__content__row2__characteristics__leftMenu__name
+                  }
+                >
+                  {item?.name}:
+                </span>
+                <span className="">{item?.info}.</span>
               </section>
             );
           })}
@@ -345,8 +660,14 @@ const Characteristics = ({ item }) => {
                   ms.container__field__content__row2__characteristics__leftMenu__row
                 }
               >
-                <span>{item.name}</span>
-                <span>{item.info}</span>
+                <span
+                  className={
+                    ms.container__field__content__row2__characteristics__leftMenu__name
+                  }
+                >
+                  {item?.name}:
+                </span>
+                <span>{item?.info}.</span>
               </section>
             );
           })}
@@ -356,16 +677,25 @@ const Characteristics = ({ item }) => {
   );
 };
 
-const ViewsChart = ({ item }) => {
-  const [data, setData] = useState([
+interface IViewCharProps {
+  item: IProduct;
+}
+
+const ViewsChart: FC<IViewCharProps> = ({ item }) => {
+  const [data] = useState([
     ["Month", "views"],
-    ["January", Math.random() * (100000 - 0) + 0],
     ["February", Math.random() * (100000 - 0) + 0],
     ["March", Math.random() * (100000 - 0) + 0],
     ["Appril", Math.random() * (100000 - 0) + 0],
     ["May", Math.random() * (100000 - 0) + 0],
     ["June", Math.random() * (100000 - 0) + 0],
     ["July", Math.random() * (100000 - 0) + 0],
+    [
+      "August",
+      item?.userComunications?.find(
+        (el: IUserInterfaceItem) => el?.name === "views"
+      )?.amount,
+    ],
   ]);
 
   const options = {

@@ -24,7 +24,7 @@ export const KeyValueInput: FC<IKeyValueProps> = ({ name, value, add }) => {
   return (
     <section className={ms.characteristics}>
       
-      <section>
+      <section className={ms.characteristics__item}>
         <span>Name:</span>
        <input value={characteristick.name}
         name="name"
@@ -33,7 +33,7 @@ export const KeyValueInput: FC<IKeyValueProps> = ({ name, value, add }) => {
       />
       </section>
       
-      <section>
+      <section className={ms.characteristics__item}>
         <span>Value:</span>{" "}
       <input
         value={characteristick.info}
@@ -42,8 +42,10 @@ export const KeyValueInput: FC<IKeyValueProps> = ({ name, value, add }) => {
         onChange={setCharacteristic}
       />
       </section>
-      
-      <Button  handleSubmit={()=>add(characteristick)} text={'Add'} width={150}/>
+      <button className={ms.push} onClick={()=>add(characteristick)}>
+        Push 
+      </button>
+     
     </section>
   );
 };

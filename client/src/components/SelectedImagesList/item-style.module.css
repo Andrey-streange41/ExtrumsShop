@@ -23,6 +23,7 @@
 .item__left__info {
   display: flex;
   flex-direction: column;
+  gap: 1em;
 }
 
 .basket {

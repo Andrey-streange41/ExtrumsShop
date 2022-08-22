@@ -6,23 +6,17 @@ import ms from "./style.module.scss";
 import { ToolsPanel } from "../../components/ToolsPanel/index.tsx";
 import { FilteredList } from "../../components/FilteredList/index.tsx";
 import { FilterMenu } from "../../components/FilterMenu/index.tsx";
-import Loader from "../../components/Loader/index.tsx";
-import { useSelector } from "react-redux";
+import { LocationMenu } from "../../components/LocationMenu/index.tsx";
+import { useAppSelector } from "../../hooks.ts";
+import { RootState } from "../../app/store.ts";
 
 export const Favorite = () => {
-  const favorList = useSelector((s) => s.productsList.favoriteList);
-  const loading = useSelector(s=>s.productsList.loading);
-  const isAuth = useSelector(s=>s.user.isAuth)
-
+  const favorList = useAppSelector(
+    (s: RootState) => s.productsList.favoriteList
+  );
+  const isAuth = useAppSelector((s: RootState) => s.user.isAuth);
 
   return (
-    loading==='pending'?
-    <Loader />
-    :
-    loading==='failed'
-    ?
-    <h1>Ups sumsing was wrong ...</h1>
-    :
     <>
       <section className={ms.container}>
         <Header />
@@ -30,24 +24,21 @@ export const Favorite = () => {
           <NavBar />
           <FilterMenu />
           <section className={ms.container__field__content}>
+            <LocationMenu />
             <ToolsPanel />
-            {
-              isAuth 
-              ?
-                (
-                  <FilteredList filterList={favorList} />
-                ) 
-              :
-              favorList.length<0?
-              <h1>Empty... </h1>
-              :
+            {isAuth && favorList.length > 0 ? (
+              <FilteredList filterList={favorList} />
+            ) : !isAuth ? (
               <h2>For favorites need authorization !</h2>
-            }
+            ) : favorList.length <= 0 ? (
+              <h1>Empty </h1>
+            ) : (
+              <span>Imposible </span>
+            )}
           </section>
         </section>
       </section>
       <Footer />
     </>
-   
   );
 };

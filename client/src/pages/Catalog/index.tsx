@@ -8,7 +8,8 @@ import { ToolsPanel } from "../../components/ToolsPanel/index.tsx";
 import { FilteredList } from "../../components/FilteredList/index.tsx";
 import { FilterMenu } from "../../components/FilterMenu/index.tsx";
 import {useSelector} from 'react-redux'
-import { getProductsThunk } from "../../app/slices/productsListSlice.ts";
+import { CloudMessage } from "../../components/CloudMessage/index.tsx";
+
 
 
 export const Catalog = () => {
@@ -20,6 +21,7 @@ export const Catalog = () => {
         <section className={ms.container__field}>
           <NavBar />
           <FilterMenu />
+         
           <section className={ms.container__field__content}>
             <LocationMenu />
             <ToolsPanel />

@@ -38,6 +38,12 @@
   align-items: flex-start;
 }
 
+.container__field__content__col1__row1__greeting__buttons {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
 .container__field__content__col1__row1__greeting h1 {
   text-align: start;
   font-size: 2em;
@@ -76,15 +82,10 @@
   border-radius: 50%;
   height: 60px;
   width: 60px;
-}
-
-.container__field__content__col1__statistick__item__icon img {
-  position: absolute;
-  margin-top: 15px;
-  margin-left: 14px;
-  height: 34px;
-  width: 34px;
-  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
 }
 
 .container__field__content__col1__statistick__item__title, .container__field__content__col1__statistick__item__info {
@@ -105,21 +106,25 @@
   color: white;
 }
 
-.container__field__content__col2 h1 {
+.container__field__content__col2 h2 {
   margin-top: 2em;
+  margin-bottom: 2em;
   font-size: 1.5em;
+  text-align: center;
 }
 
 .container__field__content__col2__list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  margin-left: 35%;
+  justify-content: flex-start;
+  gap: 3em;
 }
 
 .container__field__content__col2__list__item {
   display: flex;
   align-items: center;
+  gap: 2em;
 }
 
 .container__field__content__col2__list__item__round {
@@ -137,6 +142,12 @@
   height: 30px;
 }
 
+.container__field__content__col2__list__item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4em;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -147,4 +158,17 @@
   gap: 2em;
   flex-direction: column;
   align-items: center;
+}
+
+.heart {
+  color: red;
+}
+
+.crown {
+  color: yellow;
+}
+
+.scale, .users, .products, .views {
+  font-size: 1.5em;
+  color: black;
 }

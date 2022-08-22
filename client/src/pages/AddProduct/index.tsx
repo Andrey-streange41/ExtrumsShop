@@ -19,27 +19,50 @@ import { SelectedCharacteristicsList } from "../../components/SelectedCharacteri
 import { Button } from "../../components/UI/Button/index.tsx";
 import { addProduct } from "../../http/productApi.ts";
 import { KeyValueInput } from "../../components/UI/KeyValueInput/index.tsx";
-import { PurposeMenu } from "../../components/PurposeMenu/index.tsx";
-import { PurposeList } from "../../components/PurposeList/index.tsx";
+import { useNavigate } from "react-router-dom";
+
+import { IError } from "../AccountInfo";
+import { CheckBox } from "../../components/FilterMenu/CheckBox/index.tsx";
+import * as yup from "yup";
+import { IPurpose } from "../../types/favoriteList.types";
+import { useAppDispatch,useAppSelector } from "../../hooks.ts";
+import { RootState } from "../../app/store.ts";
+
+const nameRegex = /^[A-Za-z]+$/;
+
+let schema = yup.object().shape({
+  title: yup
+    .string()
+    .max(20)
+    .required()
+    .matches(nameRegex, "Only English letters title!"),
+    price: yup.number().max(10).required(),
+  
+});
 
 export const AddProduct: FC = () => {
   const [images, setImages] = useState<string[]>([]);
-  const [tagName, setTagName] = useState<string>("");
-
   const [subCategories, setSubCategories] = useState<string[]>([]);
-  const [categories] = useState<string[]>(modalItems.map((el) => el.title));
+  const [categories] = useState<string[]>(modalItems.map((el:any) => el.title));
   const [activeCategory, setActiveCategory] = useState<string>("Select");
   const [activeSubCategory, setActiveSubCategory] = useState<string>("Select");
   const [selectedCharacteristicsList, setCharacteristicsList] = useState<[]>(
     []
   );
-
-  const [characteristick, setCharacteristick] = useState({
+  const [errors, setErrors] = useState<IError[]>([
+    { name: "title", error: false, message: "" },
+    { name: "price", error: false, message: "" },
+    { name: "description", error: false, message: "" },
+  ]);
+  interface IChar{
+    name:string;
+    info:string;
+  }
+  const [characteristick, setCharacteristick] = useState<IChar>({
     name: "",
     info: "",
   });
   const [purposeList, setPurposeList] = useState<string[]>([]);
-
   interface IProudctInfo {
     title: string;
     price: number;
@@ -51,13 +74,55 @@ export const AddProduct: FC = () => {
     discription: "",
   });
 
+
+  const resetError = () => {
+    const buffer: IError[] = errors.map((el:IError) => {
+      if (el.name === "title") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer);
+    const buffer2: IError[] = errors.map((el:IError) => {
+      if (el.name === "price") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer2);
+    const buffer3: IError[] = errors.map((el:IError) => {
+      if (el.name === "description") {
+        el.message = null;
+        el.error = false;
+      }
+      return el;
+    });
+    setErrors(buffer3);
+  };
+
+  
+
+  
+
+  const role = useAppSelector((s:RootState) => s.user.userData.role);
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (role === "USER") {
+      nav("/");
+    }
+  }, []);
   useEffect(() => {
     setSubCategories(
       modalItems
-        .find((el) => el.title === activeCategory)
-        ?.items.map((el) => el.category)
+        .find((el:any) => el.title === activeCategory)
+        ?.items.map((el:any) => el.category)
     );
     setActiveSubCategory("Select");
+
+   
   }, [activeCategory]);
 
   const handleClickListView = (e: MouseEvent<HTMLLIElement>) => {
@@ -67,13 +132,13 @@ export const AddProduct: FC = () => {
       setActiveSubCategory(e.target.innerHTML);
     }
   };
-  const addCharacteristic = (item) => {
-
+  const addCharacteristic = (item:IChar) => {
     if (
       selectedCharacteristicsList.findIndex((el) => el.name === item.name) < 0
-    )
-      {setCharacteristicsList([...selectedCharacteristicsList, item]);
-      setCharacteristic({name:'',info:''})}
+    ) {
+      setCharacteristicsList([...selectedCharacteristicsList, item]);
+      setCharacteristic({ name: "", info: "" });
+    }
   };
   const setCharacteristic = (e: ChangeEvent<HTMLInputElement>) => {
     setCharacteristick({ ...characteristick, [e.target.name]: e.target.value });
@@ -84,42 +149,95 @@ export const AddProduct: FC = () => {
     setProductInfo({ ...productInfo, [e.target.name]: e.target.value });
   };
 
-  const handleSelectFile = (e) => {
+  const handleSelectFile = (e:ChangeEvent) => {
     setImages([...images, e.target.files[0]]);
   };
-  const removeImage = (e, target) => {
+  const removeImage = ( target:any) => {
     setImages(images.filter((el) => el.name !== target.name));
   };
-  const sendData = () => {
-    const formData = new FormData();
-    for (let i = 0; i < images.length; i++) {
-      const element = images[i];
-      formData.append("files", element);
+  const sendData = async() => {
+    try {
+      resetError();
+      const result = await schema.validate(productInfo);
+      if(images.length <= 0) {
+        alert('Select images for product , this  is required options !');
+        return;
+      }
+      if(!activeCategory||activeCategory==='Select'){
+        alert('Select category for product , this  is required options !');
+        return;
+      }
+      if(!productInfo){
+        alert('Add product info for product , this  is required options !');
+        return;
+      }
+      
+      const formData = new FormData();
+      for (let i = 0; i < images.length; i++) {
+        const element = images[i];
+        formData.append("files", element);
+      }
+      formData.append("categori", activeCategory);
+      formData.append("subCategory", activeSubCategory);
+      formData.append(
+        "characteristics",
+        JSON.stringify(selectedCharacteristicsList)
+      );
+      formData.append("productInfo", JSON.stringify(productInfo));
+      formData.append("purpose", JSON.stringify(purposeList));
+      addProduct(formData);
+    } catch (err) {
+      resetError();
+      if (String(err.message).includes("title")) {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "title") {
+            el.message = err.message;
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      }
+      else if (String(err.message).includes("price")) {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "price") {
+            el.message = err.message;
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      }
+      else if (String(err.message).includes("description")) {
+        const buffer: IError[] = errors.map((el) => {
+          if (el.name === "description") {
+            el.message = err.message;
+            el.error = true;
+          }
+          return el;
+        });
+        setErrors(buffer);
+      }
+      console.log(err);
     }
-    formData.append("categori", activeCategory);
-    formData.append("subCategory", activeSubCategory);
-    formData.append(
-      "characteristics",
-      JSON.stringify(selectedCharacteristicsList)
-    );
-    formData.append("productInfo", JSON.stringify(productInfo));
-    formData.append("purpose", JSON.stringify(purposeList));
-
-    addProduct(formData);
   };
 
-  const addTag = (tag: string) => {
-    if (!purposeList.includes(tag)) setPurposeList([...purposeList, tag]);
-  };
+ 
 
-  const removeTag = (tag: string) => {
-    setPurposeList(purposeList.filter((el) => el !== tag));
-  };
+
 
   const removeCharacter = (name: string) => {
     setCharacteristicsList(
-      selectedCharacteristicsList.filter((el) => el.name !== name)
+      selectedCharacteristicsList?.filter((el:any) => el.name !== name)
     );
+  };
+  const subMenu = useAppSelector((s:RootState) => s.navBar.subMenu);
+  const handleSelectPurpose = (purposeItem) => {
+    if (purposeItem.isActive) {
+      setPurposeList([...purposeList, purposeItem.text]);
+    } else {
+      setPurposeList(purposeList.filter((el) => el !== purposeItem.text));
+    }
   };
 
   return (
@@ -147,12 +265,14 @@ export const AddProduct: FC = () => {
                   className={ms.container__field__content__row__col__inputs}
                 >
                   <Input
+                    error={errors.find((el) => el.name === "title")}
                     name={"title"}
                     value={productInfo.title}
                     handleChange={handleChange}
                     label={"Product Name"}
                   />
                   <Input
+                    error={errors.find((el) => el.name === "price")}
                     name={"price"}
                     value={productInfo.price}
                     handleChange={handleChange}
@@ -193,20 +313,48 @@ export const AddProduct: FC = () => {
                   >
                     Characteristics
                   </span>
-                  <KeyValueInput name={characteristick.name} info={characteristick.info} add={addCharacteristic} />
+
+                  <KeyValueInput
+                    name={characteristick.name}
+                    info={characteristick.info}
+                    add={addCharacteristic}
+                  />
                   <SelectedCharacteristicsList
                     removeCharacter={removeCharacter}
                     list={selectedCharacteristicsList}
                   />
-
-                  <PurposeMenu
+                  {/* <PurposeMenu
                     tagName={tagName}
                     add={addTag}
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setTagName(e.target.value)
                     }
-                  />
-                  <PurposeList removeTag={removeTag} list={purposeList} />
+                  /> */}{subMenu.find((el) => el.text === activeCategory)?<h2>Purposes:</h2>:null}
+                  <section
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                      marginBottom:'2em'
+                    }}
+                  >
+                    
+                    {subMenu.find((el) => el.text === activeCategory) ? (
+                      subMenu
+                        .find((el) => el.text === activeCategory)
+                        ?.purpose.map((item:IPurpose) => (
+                          <CheckBox
+                            handleSelect={handleSelectPurpose}
+                            key={item.name}
+                            item={{ ...item, text: subMenu.text }}
+                          />
+                        ))
+                    ) : (
+                     null
+                    )}
+                  </section>
+
+                  {/* <PurposeList removeTag={removeTag} list={purposeList} /> */}
                 </section>
               </section>
             </section>

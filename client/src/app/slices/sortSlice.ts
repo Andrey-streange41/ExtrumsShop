@@ -1,4 +1,5 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice,PayloadAction} from '@reduxjs/toolkit';
+
 
 const initialState ={
     sortName:'Select',
@@ -20,7 +21,7 @@ const sortSlice = createSlice({
     name:'sort',
     initialState,
     reducers:{
-        setActiveItem:(state,action)=>{
+        setActiveItem:(state,action:PayloadAction<any>)=>{
             for (let i = 0; i < state.sortItemsForComment.length; i++) {
                 const element = state.sortItemsForComment[i];
                 if(element.name===action.payload.name)
@@ -32,11 +33,8 @@ const sortSlice = createSlice({
             }
             state.sortName = action.payload.name;
         },
-        setSortedList:(state,action)=>{
-            state.sortedList = action.payload;
-        }
     }
 })
 
-export const {setActiveItem,setSortedList}=sortSlice.actions;
+export const {setActiveItem}=sortSlice.actions;
 export default sortSlice.reducer;

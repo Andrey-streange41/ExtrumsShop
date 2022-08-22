@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from "react";
 import ms from "./style.module.scss";
 import birka from "../../assets/images/birka.png";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import { Link, useLocation} from "react-router-dom";
 import { IProduct, IUserInterfaceItem } from "../../types/favoriteList.types";
 import { userCommunication } from "../../assets/images/index.js";
 import {
@@ -10,15 +10,15 @@ import {
   addToFavoritesThunk,
   removeFromFavoriteListThunk,
 } from "../../app/slices/productsListSlice.ts";
+import {useAppDispatch,useAppSelector} from '../../hooks.ts';
+import { RootState } from "../../app/store.ts";
 
 interface ICardProps {
   item: IProduct;
 }
 
 export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
-  const dispatch = useDispatch();
-  const list = useSelector((s) => s.productsList.favoriteList);
-  const nav = useNavigate();
+  const dispatch = useAppDispatch();
   const loc = useLocation();
   const currentPage = loc.pathname.substring(
     1,
@@ -27,10 +27,10 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
       : loc.pathname.length
   );
   const link = currentPage + "/" + item.category + "/" + item.id;
-  const isAuth = useSelector((s) => s.user.isAuth);
+  const isAuth = useAppSelector((s:RootState) => s.user.isAuth);
   const [coms, setComs] = useState<IUserInterfaceItem[]>([]);
-  const user = useSelector((s) => s.user.userData);
-  const loading = useSelector((s) => s.productsList.loading);
+  const user = useAppSelector((s:RootState) => s.user.userData);
+  const loading = useAppSelector((s:RootState) => s.productsList.loading);
 
   const handleFavoriteClick = () => {
     if (!isAuth) {
@@ -43,10 +43,15 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
         id: item.id,
       })
     )
-      .then((data) => {
-        const favoriteState = data.payload
-          .find((el) => el.id === item.id)
-          .userComunications.find((el) => el.name === "favorites").isActive;
+      .then((data:any) => {
+        const favoriteState = Array.isArray(data?.payload)
+          ?data?.payload.find((el:IProduct) => el.id === item.id)
+          ?.userComunications?.find((el:IUserInterfaceItem) => el.name === "favorites")?.isActive
+          :
+          data.payload.userComunications.find((el:IUserInterfaceItem)=>el.name==='favorites').isActive
+          ;
+
+
         if (favoriteState === true) {
           dispatch(
             addToFavoritesThunk({ productId: item.id, userId: user.id })
@@ -57,7 +62,7 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
           );
         }
       })
-      .catch((err) => {
+      .catch((err:any) => {
         console.log(err.message);
       });
   };
@@ -85,17 +90,19 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
           alt="star.png"
         />
       </section>
-      <h2>{item.title}</h2>
-
+      <Link to={'/'+link}  style={{ textDecoration: "none", color: "black" }}>
+       <h2>{item.title}</h2>
+      </Link>
       <section className={ms.container__price}>
         <img src={birka} alt="birka.png" />
-        <span>${item.price}</span>
+        <span
+                className={item?.discountPrice > 0 ? ms.discountPrice : null}
+              >
+                ${item?.discountPrice > 0 ? item?.discountPrice : item.price}
+              </span>
+              <span className={(item?.discountPrice>0?ms.dFlex:ms.dNone)+' ' + ms.oldPrice}>${item.price}</span>
       </section>
       <section
-        onClick={() => {
-          dispatch(viewsUp(item.id));
-          nav("/" + link);
-        }}
         className={ms.container__wrapper}
       >
         <Link
@@ -111,7 +118,7 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
               String(item?.avatar).replace('"', "").replace('"', "")
             }
             alt="headphones.png"
-          />{" "}
+          />
         </Link>
       </section>
 
@@ -121,7 +128,20 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
             <img
               onClick={
                 el.name === "likes"
-                  ? () => {
+                ? () => {
+                    if (!isAuth) {
+                      alert(
+                        "You must sign in to you account for this option !"
+                      );
+                      return;
+                    }
+                    dispatch(
+                      updateProductsThunk({ name: "likes", id: item.id })
+                    );
+                  }
+                : el.name === "dislikes"
+                ? () =>
+                    {
                       if (!isAuth) {
                         alert(
                           "You must sign in to you account for this option !"
@@ -129,43 +149,32 @@ export const ProductCard_v2: FC<ICardProps> = ({ item }) => {
                         return;
                       }
                       dispatch(
-                        updateProductsThunk({ name: "likes", id: item.id })
-                      );
-                    }
-                  : el.name === "dislikes"
-                  ? () => {
-                      if (!isAuth) {
-                        alert(
-                          "You must sign in to you account for this option !"
-                        );
-                        return;
-                      }
-                      dispatch(
-                        updateProductsThunk({
-                          name: "dislikes",
-                          id: item.id,
-                        })
-                      );
-                    }
-                  : el.name === "favorites"
-                  ? handleFavoriteClick
-                  : () => {}
+                      updateProductsThunk({
+                        name: "dislikes",
+                        id: item.id,
+                      })
+                    )}
+                : el.name === "favorites"
+                ? handleFavoriteClick
+                : () => {
+                  
+                }
               }
               src={
                 el.name === "likes" && el.isActive
-                  ? userCommunication[4]
-                  : el.name === "likes" && !el.isActive
-                  ? userCommunication[0]
-                  : el.name === "dislikes" && el.isActive
-                  ? userCommunication[1]
-                  : el.name === "dislikes" && !el.isActive
-                  ? userCommunication[5]
-                  : el.name === "favorites" && el.isActive
-                  ? userCommunication[2]
-                  : el.name === "favorites" && !el.isActive
-                  ? userCommunication[6]
-                  : userCommunication[3]
-              }
+                      ? userCommunication[4]
+                      : el.name === "likes" && !el.isActive 
+                      ? userCommunication[0]
+                      : el.name === "dislikes" && el.isActive
+                      ? userCommunication[1]
+                      : el.name === "dislikes" && !el.isActive
+                      ? userCommunication[5]
+                      : el.name === "favorites" && el.isActive
+                      ? userCommunication[2]
+                      : el.name === "favorites" && !el.isActive
+                      ? userCommunication[6]
+                      : userCommunication[3]
+            }
               alt={"UI.png"}
             />
             <span>{el.amount}</span>

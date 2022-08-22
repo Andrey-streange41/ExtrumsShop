@@ -32,7 +32,7 @@ export interface ICharacteristics {
  id:number;
  productId:number;
  info:string;
-  name:string;
+ name:string;
 }
 
 export interface IUserInterfaceItem{
@@ -68,6 +68,7 @@ export interface IProduct {
   favorites?:IFavorites,
   title: string,
   userComunications:IUserInterfaceItem[],
+  discountPrice:number;
 }
 
 

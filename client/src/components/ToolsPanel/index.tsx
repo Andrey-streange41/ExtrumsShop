@@ -45,7 +45,7 @@ export const ToolsPanel = () => {
         />
       </section>
       <section className={ms.container__rectangle3}>
-        <span style={{ marginLeft: 20 }}>Category: </span>{" "}
+        <span style={{ marginLeft: 20 }}>Subcategory: </span>{" "}
         <span style={{ marginRight: 20 }}>
           {currentCategory
             .filter((i) => i.isActive)[0]

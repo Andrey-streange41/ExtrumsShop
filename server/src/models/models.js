@@ -43,6 +43,15 @@ const UserInfo = sequelize.define("user_infos", {
   updatedAt: false,
 });
 
+
+const BlockedUsers = sequelize.define('blocked_users',
+{
+  id: { type: INTEGER, primaryKey: true, autoIncrement: true },
+  userId:{ type: INTEGER, allowNull: true, unique: false },
+  ban_reason:{ type: STRING, allowNull:true },
+  
+})
+
 const Comments = sequelize.define("comments", {
   id: { type: INTEGER, primaryKey: true, autoIncrement: true },
   message: { type: STRING },
@@ -76,6 +85,7 @@ const Product = sequelize.define("product", {
   title: { type: STRING, allowNull: false },
   price: { type: INTEGER, allowNull: false },
   discount: { type: BOOLEAN, defaultValue: false },
+  discountPrice:{type:INTEGER,defaultValue:0}
 },
 {
   timestamps: false,
@@ -116,7 +126,7 @@ const UserCommunication = sequelize.define("userComunication", {
 const Characteristics = sequelize.define("characteristics", {
   id: { type: INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: STRING, allowNull: false },
-  info: { type: TEXT, allowNull: false },
+  info: { type: TEXT, defaultValue:'unset' },
 },
 {
   timestamps: false,
@@ -211,6 +221,9 @@ Characteristics.belongsTo(Product);
 Product.hasMany(Purpose, { as: "purpose" });
 Purpose.belongsTo(Product);
 
+User.hasOne(BlockedUsers);
+BlockedUsers.belongsTo(User);
+
 Product.hasMany(UserCommunication);
 UserCommunication.belongsTo(Product);
 
@@ -230,6 +243,7 @@ ModalItems.hasMany(SubCategory);
 SubCategory.belongsTo(ModalItems);
 
 module.exports = {
+  BlockedUsers,
   FavoriteList,
   UserCommunication,
   User,

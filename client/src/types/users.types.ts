@@ -8,9 +8,11 @@ export interface IUser{
     tel:string|null;
     avatar:string|null;
     updateAgrements:boolean;
-    role?:string;
     id?:string|null;
-    favorites:IProduct[]
+    favorites:IProduct[];
+    banReason?:string;
+    isBaned?:boolean;
+    role:'ADMIN'|'USER';
 }
 
 

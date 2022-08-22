@@ -6,6 +6,7 @@ import { selectSubItem } from "../../../app/slices/navBarSlice.ts";
 import { setFilteredList } from "../../../app/slices/productsListSlice.ts";
 import { Modal } from "./Modal/index.tsx";
 import ms from "./style.module.scss";
+import { getProductsThunk } from "../../../app/slices/productsListSlice.ts";
 
 export const SubMenu = () => {
   const loc = useLocation();
@@ -15,30 +16,42 @@ export const SubMenu = () => {
   const nav = useNavigate();
   const filteredList = useSelector((s) => s.productsList.productsList);
 
+ 
+  
   return (
     <section
       className={ms.container}
-      style={{
-        display: list[list.findIndex((el) => el.text === "categories")].isActive
-          ? "flex"
-          : "none",
-      }}
+      style={
+        list.find(el=>el.text === 'categories').isActive|| list.find(el=>el.text === 'favorites').isActive ?
+        {
+           display:"flex"
+        }
+        :
+        {
+          display:"none"
+       }
+
+      }
     >
       {subMenu.map((item, index) => (
         <div
           key={index}
           onClick={() => {
-           
-              nav("/" + "catalog/" + item.text);
+            if( list.find(el=>el.text === 'categories').isActive){
+               nav("/" +  "catalog/" + item.text);
+            }
+            else if ( list.find(el=>el.text === 'favorites').isActive){
+              nav("/" +  "favorites/" + item.text);
+            }
 
-              dispatch(
-                setFilteredList(
-                  filteredList.filter((i) => i.category === item.text)
-                )
-              );
+            const query = {
+              category: "",
+            };
+            query.category = item.text;
 
-              dispatch(selectSubItem(index));
-           
+            dispatch(getProductsThunk(query));
+
+            dispatch(selectSubItem(index));
           }}
           className={
             (item.isActive ? ms.activeBlock + " " : "") + ms.container__item

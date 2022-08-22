@@ -1,6 +1,7 @@
-const { User, UserInfo, UserCommunication } = require("../models/models");
+const { User, UserInfo, UserCommunication, BlockedUsers } = require("../models/models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 
 const generateJWT = (
   email,
@@ -22,7 +23,7 @@ const generateJWT = (
 class UserService {
   async login(email, password) {
     try {
-      let user = await User.findOne({ where: { email } });
+      let user = await User.findOne({ where: { email },include:{all:true} });
       if (!user) {
         throw new Error("User with the same email not exist !");
       }
@@ -31,6 +32,10 @@ class UserService {
         throw new Error("Invalid password or email !");
       }
       const userInf = await UserInfo.findOne({ where: { user_id: user.id } });
+
+      if(user.blocked_user){
+        return 'Your account was banned for Bad behavior !'
+      }
 
       return generateJWT(
         user.email,
@@ -42,12 +47,13 @@ class UserService {
         password
       );
     } catch (error) {
+      console.error(error.message);
       return new Error(error.message);
     }
   }
   async registration(candidate) {
     try {
-      await UserCommunication.update({isActive:false},{where:{}});
+      await UserCommunication.update({ isActive: false }, { where: {} });
       const { email, password, role, firstname, lastname, telphone, avatar } =
         candidate;
       let user = await User.findOne({
@@ -71,7 +77,7 @@ class UserService {
         telphone,
         avatar,
         userId: user.id,
-        user_id:user.id
+        user_id: user.id,
       });
 
       if (!userInfo) {
@@ -89,7 +95,7 @@ class UserService {
       );
       return jwt_token;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       return error;
     }
   }
@@ -106,22 +112,26 @@ class UserService {
       );
       return jwt_token;
     } catch (error) {
+      console.error(error.message);
       return error.message;
     }
   }
   async getAll() {
     try {
-      const users = await User.findAll({ include: [{ model: UserInfo }] });
+      const users = await User.findAll({ include: [{model:BlockedUsers},{model:UserInfo}] });
+      
       return users;
     } catch (error) {
+      console.error(error.message);
       return error;
     }
   }
 
-  async logout(){
+  async logout() {
     try {
-      await UserCommunication.update({isActive:false},{where:{}});
+      await UserCommunication.update({ isActive: false }, { where: {} });
     } catch (error) {
+      console.error(error.message);
       return error;
     }
   }
@@ -132,45 +142,62 @@ class UserService {
       const hashPassword = await bcrypt.hash(password, 5);
       const user = { password, email };
       const oldUser = await User.findByPk(id);
-
-      const updatedUser = await User.update(
+     
+      if(email&&password&&id)
+      { await User.update(
         {
           ...oldUser,
           email: user.email ? user.email : oldUser.email,
           password: user.password ? hashPassword : oldUser.password,
         },
         { where: { id } }
-      );
+      );}
+      else if(email&&!password&&id){
+        await User.update(
+          {
+            ...oldUser,
+            email: user.email ? user.email : oldUser.email,
+          },
+          { where: { id } }
+        );
+      }
+      else if(password&&!email&&id){
+        await User.update(
+          {
+            ...oldUser,
+            password: user.password ? hashPassword : oldUser.password
+          },
+          { where: { id } }
+        );
+      }
 
       const { firstname, lastname, tel, agrements } = data;
       const oldUserInfo = await UserInfo.findOne({ where: { user_id: id } });
-
-      if (!oldUserInfo) {
-        UserInfo.create({
-          firstname: firstname,
-          lastname: lastname,
-          telphone: tel,
-          avatar: avatar,
-          agrements: agrements,
-          user_id: id,
-        });
-      }
-
-      const updatedUserInfo = await UserInfo.update(
+      
+      await UserInfo.update(
         {
           ...oldUserInfo,
           firstname: firstname ? firstname : oldUserInfo.firstname,
           lastname: lastname ? lastname : oldUserInfo.lastname,
           telphone: tel ? tel : oldUserInfo.telphone,
           avatar: avatar ? avatar : oldUserInfo.avatar,
-          agrements: agrements,
+          agrements: agrements? agrements:oldUserInfo.agrements
         },
         { where: { user_id: id } }
       );
-
-      return updatedUser.id;
+     
+      const jwt_token = generateJWT(
+        String(email),
+        oldUser.id,
+        oldUser.role,
+        firstname,
+        lastname,
+        tel,
+        password
+      );
+      return jwt_token;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       return error;
     }
   }
@@ -184,9 +211,57 @@ class UserService {
 
       return { user, userInfo };
     } catch (error) {
+      console.error(error.message);
       return error;
     }
   }
+
+  async kick(id){
+    try {
+
+      const candidate = await BlockedUsers.findOne({where:{userId:id}});
+      if(candidate){
+        const users = await User.findAll({ include: [{model:BlockedUsers},{model:UserInfo}] });
+        return users;
+      }
+      await BlockedUsers.create({userId:id,ban_reason:'For bad behavior'}); // better from client set reason
+      const users = await User.findAll({ include: [{model:BlockedUsers},{model:UserInfo}] });
+    
+     return users;
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+
+  async unlock(id){
+    try {
+      const candidate = await BlockedUsers.findOne({where:{userId:id}});
+      if(candidate){
+        await BlockedUsers.destroy({where:{userId:id}});
+        const users = await User.findAll({ include: [{model:BlockedUsers},{model:UserInfo}] });
+        return users;
+      }
+      const users = await User.findAll({ include: [{model:BlockedUsers},{model:UserInfo}] });
+     return users;
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+
+  async changeRole({role,id}){
+    try {
+         await User.update({role:role},{where:{id:id}});
+        const users = await User.findAll({ include: [{model:BlockedUsers},{model:UserInfo}] });
+        return users;
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+
+  
 }
 
 module.exports = new UserService();

@@ -26,7 +26,7 @@ class ProductService {
       formatProduct.full_info = JSON.parse(
         productData.data.productInfo
       ).discription;
-
+      console.log(images);
       formatProduct.avatar = JSON.stringify(images[0]);
       const product = await Product.create({ ...formatProduct });
       const formatCharacteristics = JSON.parse(
@@ -64,13 +64,21 @@ class ProductService {
   }
   async getProducts({
     category,
-    subcategory,
+    sub_category,
     price,
     characteristicName_id,
-    purpose_id,
+    purposes,
     limit,
     page,
+    keyword,
   }) {
+    let formatPrice = {
+      min: 0,
+      max: 0,
+    };
+    if (price) {
+      formatPrice = JSON.parse(price);
+    }
     try {
       let products = [];
       page = page || 1;
@@ -88,95 +96,180 @@ class ProductService {
               ],
             },
             { model: UserCommunication },
-            { model: Purpose,include:{model:Product}, as:"purpose" },
-            { model:Characteristics, as:"characteristics"}
+            { model: Purpose, include: { model: Product }, as: "purpose" },
+            { model: Characteristics, as: "characteristics" },
           ],
         });
-      } else if (category && !subcategory) {
+
+        if (keyword && keyword !== "") {
+          products = products.filter((el) =>
+            String(el.title).toLowerCase().includes(keyword.toLowerCase())
+          );
+        }
+
+        if (Number(formatPrice?.min) > 0 && !Number(formatPrice?.max) > 0) {
+          products = products?.filter((el) => el.price >= formatPrice.min);
+        } else if (formatPrice.min > 0 && formatPrice.max > 0) {
+          products = products?.filter(
+            (el) => el.price >= formatPrice.min && el.price <= formatPrice.max
+          );
+        } else if (formatPrice.min <= 0 && formatPrice.max > 0) {
+          products = products?.filter((el) => el.price <= formatPrice.max);
+        }
+        return products;
+      } else if (category && !sub_category && !purposes) {
         products = await Product.findAndCountAll({
-          where: { category },
-          limit,
-          offset,
+          where: { category: category },
+          include: [
+            {
+              model: Comments,
+              include: [
+                { model: Date },
+                { model: User, include: { model: UserInfo } },
+              ],
+            },
+            { model: UserCommunication },
+            { model: Purpose, include: { model: Product }, as: "purpose" },
+            { model: Characteristics, as: "characteristics" },
+          ],
         });
-      } else if (
-        category &&
-        subcategory &&
-        !price &&
-        !characteristicName_id &&
-        !purpose_id
-      ) {
-        products = await Product.findAndCountAll({
-          where: { category, subcategory },
-          limit,
-          offset,
+        if (keyword && keyword !== "") {
+          products = products?.rows?.filter((el) =>
+            String(el.title).toLowerCase().includes(keyword?.toLowerCase())
+          );
+        }
+        if (Number(formatPrice?.min) > 0 && !Number(formatPrice?.max) > 0) {
+          products = products?.rows?.filter(
+            (el) => el.price >= formatPrice?.min
+          );
+        } else if (formatPrice.min > 0 && formatPrice.max > 0) {
+          products = products?.rows?.filter(
+            (el) => el.price >= formatPrice.min && el.price <= formatPrice.max
+          );
+        } else if (formatPrice.min <= 0 && formatPrice.max > 0) {
+          products = products?.rows?.filter(
+            (el) => el.price <= formatPrice.max
+          );
+        }
+        return products;
+      } else if (category && sub_category && !purposes) {
+        products = await Product.findAll({
+          where: { category: category, sub_category: sub_category },
+          include: [
+            {
+              model: Comments,
+              include: [
+                { model: Date },
+                { model: User, include: { model: UserInfo } },
+              ],
+            },
+            { model: UserCommunication },
+            { model: Purpose, include: { model: Product }, as: "purpose" },
+            { model: Characteristics, as: "characteristics" },
+          ],
         });
-      } else if (
-        category &&
-        subcategory &&
-        price &&
-        !characteristicName_id &&
-        !purpose_id
-      ) {
-        products = await Product.findAndCountAll({
-          where: { category, subcategory, price },
-          limit,
-          offset,
-        }); //need fixing price
-      } else if (
-        category &&
-        subcategory &&
-        price &&
-        characteristicName_id &&
-        !purpose_id
-      ) {
-        products = await Product.findAndCountAll({
-          where: { category, subcategory, price, characteristicName_id },
-          limit,
-          offset,
+        if (keyword && keyword !== "") {
+          products = products.filter((el) =>
+            String(el.title).toLowerCase().includes(keyword.toLowerCase())
+          );
+
+          if (Number(formatPrice?.min) > 0 && !Number(formatPrice?.max) > 0) {
+            products = products?.filter((el) => el.price >= formatPrice.min);
+          } else if (formatPrice.min > 0 && formatPrice.max > 0) {
+            products = products?.filter(
+              (el) => el.price >= formatPrice.min && el.price <= formatPrice.max
+            );
+          } else if (formatPrice.min <= 0 && formatPrice.max > 0) {
+            products = products?.filter((el) => el.price <= formatPrice.max);
+          }
+
+          return products;
+        }
+      } else if (category && sub_category && purposes) {
+        products = await Product.findAll({
+          where: { category: category, sub_category: sub_category },
+          include: [
+            {
+              model: Comments,
+              include: [
+                { model: Date },
+                { model: User, include: { model: UserInfo } },
+              ],
+            },
+            { model: UserCommunication },
+            { model: Purpose, include: { model: Product }, as: "purpose" },
+            { model: Characteristics, as: "characteristics" },
+          ],
         });
-      } else if (
-        category &&
-        subcategory &&
-        price &&
-        characteristicName_id &&
-        purpose_id
-      ) {
-        products = await Product.findAndCountAll({
-          where: {
-            category,
-            subcategory,
-            price,
-            characteristicName_id,
-            purpose_id,
-          },
-          limit,
-          offset,
+
+        if (keyword && keyword !== "") {
+          products = products.filter((el) =>
+            String(el.title).toLowerCase().includes(keyword.toLowerCase())
+          );
+        }
+
+        if (Number(formatPrice?.min) > 0 && !Number(formatPrice?.max) > 0) {
+          products = products?.filter((el) => el.price >= formatPrice.min);
+        } else if (formatPrice.min > 0 && formatPrice.max > 0) {
+          products = products?.filter(
+            (el) => el.price >= formatPrice.min && el.price <= formatPrice.max
+          );
+        } else if (formatPrice.min <= 0 && formatPrice.max > 0) {
+          products = products?.filter((el) => el.price <= formatPrice.max);
+        }
+
+        const buffer = [];
+        for (let i = 0; i < products.length; i++) {
+          for (let j = 0; j < products[i].purpose.length; j++) {
+            if (purposes.includes(products[i].purpose[j].name)) {
+              buffer.push(products[i]);
+              break;
+            }
+          }
+        }
+        return buffer;
+      } else if (category && purposes && !sub_category) {
+        products = await Product.findAll({
+          where: { category: category },
+          include: [
+            {
+              model: Comments,
+              include: [
+                { model: Date },
+                { model: User, include: { model: UserInfo } },
+              ],
+            },
+            { model: UserCommunication },
+            { model: Purpose, include: { model: Product }, as: "purpose" },
+            { model: Characteristics, as: "characteristics" },
+          ],
         });
-      } else if (
-        category &&
-        subcategory &&
-        characteristicName_id &&
-        !price &&
-        !purpose_id
-      ) {
-        products = await Product.findAndCountAll({
-          where: { category, subcategory, characteristicName_id },
-          limit,
-          offset,
-        });
-      } else if (
-        category &&
-        subcategory &&
-        purpose_id &&
-        !price &&
-        !characteristicName_id
-      ) {
-        products = await Product.findAndCountAll({
-          where: { category, subcategory, purpose_id },
-          limit,
-          offset,
-        });
+        if (keyword && keyword !== "") {
+          products = products.filter((el) =>
+            String(el.title).toLowerCase().includes(keyword.toLowerCase())
+          );
+        }
+        if (Number(formatPrice?.min) > 0 && !Number(formatPrice?.max) > 0) {
+          products = products?.filter((el) => el.price >= formatPrice.min);
+        } else if (formatPrice.min > 0 && formatPrice.max > 0) {
+          products = products?.filter(
+            (el) => el.price >= formatPrice.min && el.price <= formatPrice.max
+          );
+        } else if (formatPrice.min <= 0 && formatPrice.max > 0) {
+          products = products?.filter((el) => el.price <= formatPrice.max);
+        }
+        const buffer = [];
+        for (let i = 0; i < products.length; i++) {
+          for (let j = 0; j < products[i].purpose.length; j++) {
+            if (purposes.includes(products[i].purpose[j].name)) {
+              buffer.push(products[i]);
+              break;
+            }
+          }
+        }
+        return buffer;
       }
+
       return products;
     } catch (error) {
       console.error(error.message);
@@ -186,8 +279,19 @@ class ProductService {
   async getProductById(id) {
     try {
       const product = await Product.findOne({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
         where: { id },
-        include: [{ model: Characteristics, as: "characteristics" }],
       });
       return product;
     } catch (error) {
@@ -205,7 +309,21 @@ class ProductService {
           { amount: record.amount + 1 },
           { where: { productId: id, name: "views" } }
         );
-        const data = await Product.findAll({ include: { all: true } });
+        const data = await Product.findOne({
+          include: [
+            {
+              model: Comments,
+              include: [
+                { model: Date },
+                { model: User, include: { model: UserInfo } },
+              ],
+            },
+            { model: UserCommunication },
+            { model: Purpose, include: { model: Product }, as: "purpose" },
+            { model: Characteristics, as: "characteristics" },
+          ],
+          where: { id: id },
+        });
         return data;
       }
 
@@ -249,7 +367,21 @@ class ProductService {
         { amount: operation, isActive: !record.isActive },
         { where: { productId: id, name: name } }
       );
-      const data = await Product.findAll({ include: { all: true } });
+      const data = await Product.findOne({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+        where: { id: id },
+      });
 
       return data;
     } catch (error) {
@@ -322,7 +454,20 @@ class ProductService {
         include: { all: true },
         where: { id: productId },
       });
-      return product;
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
     } catch (error) {
       console.error(error.message);
       return error.message;
@@ -331,18 +476,222 @@ class ProductService {
 
   async getComments({ id }) {
     try {
-      const results = await Comments.findAll({
+      const results = await Product.findAll({
         include: [
-          { model: User, include: { model: UserInfo } },
-          { model: Date },
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
         ],
-        where: { productId: id },
       });
 
       return results;
     } catch (error) {
       console.error(error.message);
       return error;
+    }
+  }
+
+  async deleteComment({ id }) {
+    try {
+      await Comments.destroy({ where: { id: id }, cascade: true });
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+  async updateProductInfo({
+    description,
+    id,
+    charactersValue,
+    charactersKey,
+    title,
+    price,
+    newImage,
+    discountPrice,
+  }) {
+    try {
+      if (description && description !== "")
+        await Product.update({ full_info: description }, { where: { id } });
+
+      if (charactersKey && charactersValue) {
+        await Characteristics.update(
+          { info: charactersValue },
+          { where: { productId: id, name: charactersKey } }
+        );
+      }
+
+      if (title) await Product.update({ title: title }, { where: { id } });
+      if (price && !discountPrice)
+        await Product.update({ price: price }, { where: { id } });
+   
+        console.log(price,discountPrice);
+      if (price && discountPrice >= 0)
+    {
+        await Product.update(
+          {
+            price: price,
+            discountPrice: discountPrice,
+            discount: discountPrice > 0 ? true : false,
+          },
+          { where: { id: id } }
+        );}
+
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+  async removeProductInfo({ charactersKey, id, imageId }) {
+    try {
+      if (charactersKey && id)
+        await Characteristics.destroy({
+          where: { productId: id, name: charactersKey },
+        });
+
+      if (id && imageId) {
+        const product = await Product.findOne({ where: { id } });
+        await Product.update(
+          {
+            images: JSON.stringify(
+              JSON.parse(product.images).filter((el) => el !== imageId)
+            ),
+          },
+          { where: { id } }
+        );
+      }
+
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+  async addProductInfo({ id, fileName }) {
+    try {
+      const productId = JSON.parse(id);
+      if (productId && fileName) {
+        const product = await Product.findOne({ where: { id: productId } });
+        const images = [...JSON.parse(product.images), fileName];
+        await Product.update(
+          { images: JSON.stringify(images) },
+          { where: { id: productId } }
+        );
+      }
+
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
+    } catch (error) {
+      console.error(error.message);
+      return error;
+    }
+  }
+
+  async addChar({ key, value, id }) {
+    try {
+      if (key && value && id)
+        await Characteristics.create({ name: key, info: value, productId: id });
+
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
+    } catch (error) {
+      console.log(error.message);
+      return error.message;
+    }
+  }
+
+  async deleteById({ id }) {
+    try {
+      await Product.destroy({ where: { id: id }, cascade: true });
+
+      return await Product.findAll({
+        include: [
+          {
+            model: Comments,
+            include: [
+              { model: Date },
+              { model: User, include: { model: UserInfo } },
+            ],
+          },
+          { model: UserCommunication },
+          { model: Purpose, include: { model: Product }, as: "purpose" },
+          { model: Characteristics, as: "characteristics" },
+        ],
+      });
+    } catch (error) {
+      console.log(error.message);
+      return error.message;
     }
   }
 }

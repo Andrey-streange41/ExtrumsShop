@@ -4,8 +4,12 @@ import {
   SerializedError,
   PayloadAction,
 } from "@reduxjs/toolkit";
-import { IComment, IProduct } from "../../types/favoriteList.types";
-import { tmpProductList } from "../../localDB/index.ts";
+import {
+  IComment,
+  IProduct,
+  IUserInterfaceItem,
+} from "../../types/favoriteList.types";
+import { AxiosError } from "axios";
 import {
   addComment,
   getProducts,
@@ -13,13 +17,17 @@ import {
   updateComunicationByProductId,
   removeFromFavorites,
   getFavoriteList,
+  removeComment,
+  updateProductInfo,
+  removeProductInfo,
+  addProductInfo,
+  addChar,
+  removeProductById,
 } from "../../http/productApi.ts";
-import { AxiosError } from "axios";
+import { IPrice } from "./modalFilterSlice";
 
 export interface IProductsList {
   favoriteList: IProduct[];
-  productsList: IProduct[];
-  filteredList: IProduct[];
   favorFilterList: IProduct[];
   loading: "idle" | "pending" | "succeeded" | "failed";
   currentRequestId: string | undefined;
@@ -30,8 +38,6 @@ export interface IProductsList {
 
 const initialState: IProductsList = {
   favoriteList: [],
-  productsList: tmpProductList,
-  filteredList: [],
   favorFilterList: [],
   loading: "idle",
   currentRequestId: undefined,
@@ -40,24 +46,126 @@ const initialState: IProductsList = {
   comments: [],
 };
 
-export const getProductsThunk = createAsyncThunk<IProduct[]>(
-  "get/product",
-  async (_,{rejectWithValue}) => {
+export interface IRemoveProductInfo {
+  id: number;
+  characterKey?: string;
+  imageId?: string;
+}
+
+export const removeProductInfoThunk = createAsyncThunk<
+  IProduct[],
+  IRemoveProductInfo,
+  {rejectValue:string}
+>(
+  "remove/productInfo",
+  async (params: IRemoveProductInfo, { rejectWithValue }) => {
     try {
-      const products = await getProducts();
-      return products;
+      const responce = await removeProductInfo(params);
+      return responce;
     } catch (error) {
-      console.log(error.message);
-      rejectWithValue(error);
-      return error.message;
+      console.error(error.message);
+     return  rejectWithValue(error);
+    
     }
   }
 );
-interface ICommunication{
-  name:string;
-  id:number;
+
+export const removeProductThunk = createAsyncThunk<IProduct[],number,{rejectValue:string}>(
+  "delete/product",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const responce = await removeProductById(id);
+      return responce;
+    } catch (error) {
+      console.log(error.message);
+     return rejectWithValue(error);
+    }
+  }
+);
+export interface ICreateChar {
+  key: string;
+  value: string;
+  id: number;
 }
-export const updateProductsThunk = createAsyncThunk<IProduct[],ICommunication>(
+
+export const addCharacteristicThunk = createAsyncThunk<IProduct[], ICreateChar,{rejectValue:string}>(
+  "add/characteristic",
+  async (params: ICreateChar, { rejectWithValue }) => {
+    try {
+      const responce = await addChar(params);
+      return responce;
+    } catch (error) {
+      rejectWithValue(error);
+    }
+  }
+);
+
+export interface IUpdateProductInfo {
+  description?: string;
+  id: number;
+  charactersValue?: string;
+  charactersKey?: string;
+  title?: string;
+  price?: number;
+  discountPrice?: number;
+  newImage?: File;
+}
+export const updateProductInfoThunk = createAsyncThunk<
+  IProduct[],
+  IUpdateProductInfo
+  ,{rejectValue:string}
+>(
+  "update/productInfo",
+  async (params: IUpdateProductInfo, { rejectWithValue }) => {
+    try {
+      const responce = await updateProductInfo(params);
+      return responce;
+    } catch (error) {
+      console.error(error.message);
+       return rejectWithValue(error);
+     
+    }
+  }
+);
+
+export const addProductInfoThunk = createAsyncThunk<IProduct[], FormData,{rejectValue:string}>(
+  "add/productInfo",
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const products = await addProductInfo(formData);
+      return products;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+interface IQuery {
+  category?: string;
+  keyword?: string;
+  sub_category?: string;
+  price?: IPrice;
+  purposes?: string[];
+}
+export const getProductsThunk = createAsyncThunk<
+  IProduct[] | AxiosError,
+  IQuery
+  ,{rejectValue:string}
+>("get/product", async (query: IQuery, { rejectWithValue }) => {
+  try {
+    const products = await getProducts(query);
+    if (products.code === "ERR_NETWORK") {
+      throw new AxiosError("Server error.");
+    }
+    return products;
+  } catch (error) {
+   return rejectWithValue(error);
+  }
+});
+interface ICommunication {
+  name: string;
+  id: number;
+}
+export const updateProductsThunk = createAsyncThunk<IProduct[], ICommunication,{rejectValue:string}>(
   "update/product",
   async function (data, { rejectWithValue }) {
     try {
@@ -65,42 +173,44 @@ export const updateProductsThunk = createAsyncThunk<IProduct[],ICommunication>(
       return products;
     } catch (error) {
       console.log(error.message);
-      rejectWithValue(error);
-      return error.message;
+     return rejectWithValue(error);
+      
     }
   }
 );
-interface IFavoriteAdding{
-  userId:number;
-  productId:number;
+interface IFavoriteAdding {
+  userId: number;
+  productId: number;
 }
-export const addToFavoritesThunk = createAsyncThunk<IProduct[],IFavoriteAdding>(
-  "add/favorites",
-  async function (data, { rejectWithValue }) {
-    try {
-      const products = await addToFavorites(data);
-      return products;
-    } catch (error) {
-      console.log(error.message);
-      rejectWithValue(error);
-      return error.message;
-    }
+export const addToFavoritesThunk = createAsyncThunk<
+  IProduct[],
+  IFavoriteAdding
+  ,{rejectValue:string}
+>("add/favorites", async function (data, { rejectWithValue }) {
+  try {
+    const products = await addToFavorites(data);
+    return products;
+  } catch (error) {
+    console.log(error.message);
+    return rejectWithValue(error);
+    
   }
-);
-export const removeFromFavoriteListThunk = createAsyncThunk<IProduct[],IFavoriteAdding>(
-  "remove/favorites",
-  async function (data, { rejectWithValue }) {
-    try {
-      const responce = await removeFromFavorites(data);
-      return responce;
-    } catch (error) {
-      console.log(error.message);
-      rejectWithValue(error);
-      return error.message;
-    }
+});
+export const removeFromFavoriteListThunk = createAsyncThunk<
+  IProduct[],
+  IFavoriteAdding
+  ,{rejectValue:string}
+>("remove/favorites", async function (data, { rejectWithValue }) {
+  try {
+    const responce = await removeFromFavorites(data);
+    return responce;
+  } catch (error) {
+    console.log(error.message);
+   return rejectWithValue(error);
+   
   }
-);
-export const getFavorListThunk = createAsyncThunk<IProduct[],number>(
+});
+export const getFavorListThunk = createAsyncThunk<IProduct[], number,{rejectValue:string}>(
   "remove/favorites",
   async function (userId, { rejectWithValue }) {
     try {
@@ -108,50 +218,48 @@ export const getFavorListThunk = createAsyncThunk<IProduct[],number>(
       return responce;
     } catch (error) {
       console.log(error.message);
-      rejectWithValue(error);
-      return error.message;
+      return  rejectWithValue(error);
+     
     }
   }
 );
-interface IAddComment{
-  comment:IComment;
-  productId:number;
-  userId:number;
+interface IAddComment {
+  comment: IComment;
+  productId: number;
+  userId: number;
 }
+export const addCommentToProductThunk = createAsyncThunk<
+  IProduct[],
+  IAddComment
+  ,{rejectValue:string}
+>("add/comment", async function (data, { rejectWithValue }) {
+  try {
+    const responce = await addComment(data);
 
-export const addCommentToProductThunk = createAsyncThunk<IProduct,IAddComment>(
-  "add/comment",
-  async function (data, { rejectWithValue }) {
+    return responce;
+  } catch (error) {
+    console.log(error.message);
+    return rejectWithValue(error);
+  }
+});
+export const removeCommentThunk = createAsyncThunk<IProduct[], number,{rejectValue:string}>(
+  "remove/comment",
+  async (id, { rejectWithValue }) => {
     try {
-      const responce = await addComment(data);
+      const responce = await removeComment(id);
       return responce;
     } catch (error) {
       console.log(error.message);
-      rejectWithValue(error);
+      return  rejectWithValue(error);
+      
     }
   }
 );
-
-export const removeCommentThunk = createAsyncThunk<IProduct,number>('remove/comment',
-async (id,{rejectWithValue}) => {
-  try {
-    const reponce = await removeComment(id);
-    return responce;
-  } catch (error) {
-     console.log(error.message);
-     rejectWithValue(error);
-     return error.message;
-  }
-}
-)
 
 const productsListSlice = createSlice({
   name: "productsList",
   initialState,
   reducers: {
-    setFilteredList: (state, action: PayloadAction<IProduct[]>) => {
-      if (action.payload) state.filteredList = [...action.payload];
-    },
     setProductsList: (state, action: PayloadAction<IProduct[]>) => {
       if (action.payload) state.testList = [...action.payload];
     },
@@ -172,8 +280,15 @@ const productsListSlice = createSlice({
     [String(getProductsThunk.fulfilled)]: (state, action) => {
       const { requestId } = action.meta;
       if (state.loading === "pending" && requestId === state.currentRequestId) {
+        if (!action.payload) throw new AxiosError("Server error.");
         state.loading = "idle";
         state.testList = [...action.payload];
+        state.favoriteList = state.testList.filter(
+          (el) =>
+            el.userComunications.find(
+              (el: IUserInterfaceItem) => el.name === "favorites"
+            ).isActive === true
+        );
         state.currentRequestId = undefined;
       }
     },
@@ -197,13 +312,14 @@ const productsListSlice = createSlice({
       if (state.loading === "pending" && requestId === state.currentRequestId) {
         state.loading = "idle";
         if (action.payload) {
-          state.testList = [...action.payload];
-          const coms = action.payload.filter(
-            (el) =>
-              el.userComunications.find((el) => el.name === "favorites")
-                .isActive
+          const element = state.testList?.find(
+            (el: IProduct) => el.id === action.payload.id
           );
-          state.favoriteList = coms;
+          element.userComunications = action.payload?.userComunications;
+          const fav = state.favoriteList?.find(
+            (el: IProduct) => el.id === element.id
+          );
+          if (fav) fav.userComunications = element?.userComunications;
         }
         state.currentRequestId = undefined;
       }
@@ -216,6 +332,7 @@ const productsListSlice = createSlice({
         state.currentRequestId = undefined;
       }
     },
+
     [String(addToFavoritesThunk.pending)]: (state, action) => {
       if (state.loading === "idle") {
         state.loading = "pending";
@@ -225,7 +342,7 @@ const productsListSlice = createSlice({
     [String(addToFavoritesThunk.fulfilled)]: (state, action) => {
       if (state.loading === "pending") {
         state.loading = "idle";
-        if(action.payload) state.favoriteList = [...action.payload];
+        if (action.payload) state.favoriteList = [...action.payload];
         state.currentRequestId = undefined;
       }
     },
@@ -237,6 +354,7 @@ const productsListSlice = createSlice({
         state.currentRequestId = undefined;
       }
     },
+
     [String(removeFromFavoriteListThunk.pending)]: (state, action) => {
       if (state.loading === "idle") {
         state.loading = "pending";
@@ -247,7 +365,9 @@ const productsListSlice = createSlice({
       const { requestId } = action.meta;
       if (state.loading === "pending" && requestId === state.currentRequestId) {
         state.loading = "idle";
-        if(action.payload) state.favoriteList = [...action.payload];
+    
+
+        state.favoriteList = [...action.payload];
         state.currentRequestId = undefined;
       }
     },
@@ -255,10 +375,12 @@ const productsListSlice = createSlice({
       const { requestId } = action.meta;
       if (state.loading === "pending" && requestId === state.currentRequestId) {
         state.error = action.payload;
+        console.log("removing error!");
         state.loading = "failed";
         state.currentRequestId = undefined;
       }
     },
+
     [String(getFavorListThunk.pending)]: (state, action) => {
       if (state.loading === "idle") {
         state.loading = "pending";
@@ -291,16 +413,7 @@ const productsListSlice = createSlice({
     [String(addCommentToProductThunk.fulfilled)]: (state, action) => {
       const { requestId } = action.meta;
       if (state.loading === "pending" && requestId === state.currentRequestId) {
-        state.comments = action.payload.comments;
-        const replaceIndex = state.testList?.findIndex(
-          (el) => el.id === action.payload.id
-        );
-        if (replaceIndex)
-          state.testList = state.testList?.splice(
-            replaceIndex,
-            1,
-            action.payload
-          );
+        state.testList = [...action.payload];
         state.loading = "idle";
         state.currentRequestId = undefined;
       }
@@ -313,14 +426,148 @@ const productsListSlice = createSlice({
         state.currentRequestId = undefined;
       }
     },
+
+    [String(removeCommentThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(removeCommentThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(removeCommentThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "failed";
+        state.currentRequestId = undefined;
+      }
+    },
+
+    [String(updateProductInfoThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(updateProductInfoThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(updateProductInfoThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "failed";
+        state.currentRequestId = undefined;
+      }
+    },
+
+    [String(removeProductInfoThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(removeProductInfoThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(removeProductInfoThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "failed";
+        state.currentRequestId = undefined;
+      }
+    },
+
+    [String(addProductInfoThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(addProductInfoThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(addProductInfoThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "failed";
+        state.currentRequestId = undefined;
+      }
+    },
+
+    [String(addCharacteristicThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(addCharacteristicThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(addCharacteristicThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "failed";
+        state.currentRequestId = undefined;
+      }
+    },
+
+    [String(removeProductThunk.pending)]: (state, action) => {
+      if (state.loading === "idle") {
+        state.loading = "pending";
+        state.currentRequestId = action.meta.requestId;
+      }
+    },
+    [String(removeProductThunk.fulfilled)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.loading = "idle";
+        state.testList = [...action.payload];
+        state.currentRequestId = undefined;
+      }
+    },
+    [String(removeProductThunk.rejected)]: (state, action) => {
+      const { requestId } = action.meta;
+      if (state.loading === "pending" && requestId === state.currentRequestId) {
+        state.error = action.payload;
+        state.loading = "failed";
+        state.currentRequestId = undefined;
+      }
+    },
   },
 });
 
-export const {
-  setFilteredList,
-  setProductsList,
-  setFavoriteList,
-  setFavorFilterList,
-} = productsListSlice.actions;
+export const { setProductsList, setFavoriteList, setFavorFilterList } =
+  productsListSlice.actions;
 
 export default productsListSlice.reducer;

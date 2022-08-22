@@ -11,6 +11,10 @@ router.post('/login',UserController.login);
 router.put('/update',UserController.updateUserById);
 router.get('/:id',UserController.getUserById);
 router.post('/logout',UserController.logout);
+router.post('/kick/:id',UserController.kick);
+router.delete('/unlock/:id',UserController.unlock);
+router.put('/changeRole',UserController.changeRole);
+
 
 
 module.exports = router;

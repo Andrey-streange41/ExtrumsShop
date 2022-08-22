@@ -23,16 +23,17 @@ class UserController {
       });
       return res.status(200).json(jwt_token);
     } catch (error) {
+      console.log(error.message);
       res.status(500).json(error);
     }
   }
 
-  async logout(req,res){
+  async logout(_, res) {
     try {
       await UserService.logout();
       res.status(200);
     } catch (error) {
-      res.status(500).json(error)
+      res.status(500).json(error);
     }
   }
 
@@ -41,6 +42,7 @@ class UserController {
       const users = await UserService.getAll();
       return res.status(200).json(users);
     } catch (error) {
+      console.log(error.message);
       res.status(500).json(error.message);
     }
   }
@@ -75,19 +77,21 @@ class UserController {
     }
   }
 
-  async updateUserById(req, res,next) {
+  async updateUserById(req, res) {
     try {
       const data = req.body;
-     
-      let fileName =null;
-      if(req.files){
-         const  {avatar} = req.files;
-         fileName = uuid.v4() + `.png`;
-         avatar.mv(path.resolve(__dirname, "..", "..", "static", fileName));
-      }
-     
 
-      const updatedUser = await UserService.updateUserById({...data,avatar:fileName});
+      let fileName = null;
+      if (req.files) {
+        const { avatar } = req.files;
+        fileName = uuid.v4() + `.png`;
+        avatar.mv(path.resolve(__dirname, "..", "..", "static", fileName));
+      }
+
+      const updatedUser = await UserService.updateUserById({
+        ...data,
+        avatar: fileName,
+      });
 
       return res.status(200).json(updatedUser);
     } catch (error) {
@@ -95,14 +99,46 @@ class UserController {
       return error.message;
     }
   }
-  async getUserById(req,res){
+  async getUserById(req, res) {
     try {
       const user = await UserService.getUserById(req.params.id);
       return res.status(200).json(user);
     } catch (error) {
+      console.log(error.message);
       return res.status(500).json(error.message);
     }
   }
+
+  async kick(req, res) {
+    try {
+      const users = await UserService.kick(req.params.id);
+      return res.status(200).json(users);
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json(error.message);
+    }
+  }
+  async unlock(req, res) {
+  try {
+    const users = await UserService.unlock(req.params.id);
+    return res.status(200).json(users);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json(error.message);
+  }
+}
+
+async changeRole(req, res) {
+  try {
+    console.log(req.body);
+    const users = await UserService.changeRole(req.body);
+    return res.status(200).json(users);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json(error.message);
+  }
+}
+
 }
 
 module.exports = new UserController();

@@ -22,14 +22,12 @@ interface IListItemProps {
 
 
 const ListItem: FC<IListItemProps> = ({ img,removeItem }) => {
-    
-
     return (
         <li className={ms_item.item}>
             <section className={ms_item.item__left}>
-                <img src={window.URL.createObjectURL(img)} alt="picture.png" />
+                <img src={img?window.URL.createObjectURL(img):''} alt="picture.png" />
                 <section className={ms_item.item__left__info}>
-                    <h3>title</h3>
+                    <h3>{img?.name}</h3>
                     <span>513KB</span>
                 </section>
             </section>

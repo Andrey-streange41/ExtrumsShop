@@ -16,13 +16,13 @@ const toolsPanelSlice = createSlice({
     initialState,
     name:"toolsPanel",
     reducers:{
-        switchMode:(state,action)=>{
+        switchMode:(state)=>{
             state.isActiveViewMode = !state.isActiveViewMode;
         },
-        switchPriceMenu:(state,action)=>{
+        switchPriceMenu:(state)=>{
             state.isActivePriceMenu = !state.isActivePriceMenu;
         },
-        switchFilterMenu:(state,action)=>{
+        switchFilterMenu:(state)=>{
             state.isActiveFilterMenu = !state.isActiveFilterMenu;
         }
     }

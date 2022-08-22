@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import  commentsSlice  from './slices/commentsSlice.ts';
 import modalFilterSlice from './slices/modalFilterSlice.ts';
-import  navBarSlice  from './slices/navBarSlice.ts';
+import navBarSlice  from './slices/navBarSlice.ts';
 import productsListSlice from './slices/productsListSlice.ts';
 import searchSlice from './slices/searchSlice.ts';
 import sortSlice from './slices/sortSlice.ts';
@@ -18,10 +17,13 @@ export const store = configureStore({
         sort: sortSlice,
         search: searchSlice,
         user:userSlice,
-        comments:commentsSlice
+       
     },
   })
-
-  export type RootState = ReturnType<typeof store.getState>;
-  export type AppDispatch = typeof store.dispatch;
   
+
+  
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export default store;  
