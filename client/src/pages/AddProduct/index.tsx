@@ -36,7 +36,7 @@ let schema = yup.object().shape({
     .max(20)
     .required()
     .matches(nameRegex, "Only English letters title!"),
-    price: yup.number().max(10).required(),
+    price: yup.number().required(),
   
 });
 
